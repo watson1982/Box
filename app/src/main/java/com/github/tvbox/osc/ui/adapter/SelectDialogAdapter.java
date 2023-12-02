@@ -1,8 +1,6 @@
 package com.github.tvbox.osc.ui.adapter;
 
 import android.annotation.SuppressLint;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
