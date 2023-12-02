@@ -787,7 +787,7 @@ public class HomeActivity extends BaseActivity {
             }
 
             dialog.setTip(getString(R.string.dia_source));
-            dialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<SourceBean>() {
+            dialog.setAdapter(tvRecyclerView,new SelectDialogAdapter.SelectDialogInterface<SourceBean>() {
                 @Override
                 public void click(SourceBean value, int pos) {
                     ApiConfig.get().setSourceBean(value);
