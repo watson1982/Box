@@ -8,15 +8,17 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.ViewModelProvider;
-
+import androidx.recyclerview.widget.DiffUtil;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.github.catvod.crawler.JsLoader;
 import com.github.tvbox.osc.R;
@@ -30,6 +32,7 @@ import com.github.tvbox.osc.event.ServerEvent;
 import com.github.tvbox.osc.server.ControlManager;
 import com.github.tvbox.osc.ui.adapter.PinyinAdapter;
 import com.github.tvbox.osc.ui.adapter.SearchAdapter;
+import com.github.tvbox.osc.ui.adapter.SelectDialogAdapter;
 import com.github.tvbox.osc.ui.dialog.RemoteDialog;
 import com.github.tvbox.osc.ui.dialog.SearchCheckboxDialog;
 import com.github.tvbox.osc.ui.tv.QRCodeGen;
@@ -37,6 +40,7 @@ import com.github.tvbox.osc.ui.tv.widget.SearchKeyboard;
 import com.github.tvbox.osc.util.FastClickCheckUtil;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.github.tvbox.osc.util.SearchHelper;
+import com.github.tvbox.osc.util.SettingsUtil;
 import com.github.tvbox.osc.viewmodel.SourceViewModel;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -54,7 +58,7 @@ import com.owen.tvrecyclerview.widget.V7LinearLayoutManager;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-
+import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -62,7 +66,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-
+import me.jessyan.autosize.utils.AutoSizeUtils;
 /**
  * @author pj567
  * @date :2020/12/23
@@ -83,7 +87,9 @@ public class SearchActivity extends BaseActivity {
     private PinyinAdapter wordAdapter;
     private String searchTitle = "";
     private ImageView tvSearchCheckbox;
-    private static HashMap<String, String> mCheckSources = null;
+    private TextView filterBtn;
+    private String sKey;
+    private HashMap<String, String> mCheckSources = null;
     private SearchCheckboxDialog mSearchCheckboxDialog = null;
 
     @Override
@@ -125,6 +131,7 @@ public class SearchActivity extends BaseActivity {
         EventBus.getDefault().register(this);
         llLayout = findViewById(R.id.llLayout);
         etSearch = findViewById(R.id.etSearch);
+        filterBtn = findViewById(R.id.filterBtn);
         tvSearch = findViewById(R.id.tvSearch);
         tvSearchCheckbox = findViewById(R.id.tvSearchCheckbox);
         tvClear = findViewById(R.id.tvClear);
@@ -246,6 +253,102 @@ public class SearchActivity extends BaseActivity {
                 }
             }
         });
+        
+        setLoadSir(llLayout);
+        this.sKey = (String) SettingsUtil.hkGet(HawkConfig.SEARCH_FILTER_KEY, "");
+        String string;
+        if (TextUtils.isEmpty(this.sKey)) {
+            string = "全局搜索";
+        } else if (this.sKey.equals("filter__home")) {
+            string = "默认源: " + ApiConfig.get().getHomeSourceBean().getName();
+        } else {
+            SourceBean sourceBean = ApiConfig.get().getSource(this.sKey);
+            string = sourceBean != null ? sourceBean.getName() : "全局搜索";
+        }
+        filterBtn.setText(string);
+        filterBtn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                int i;
+                List<SourceBean> requestList = new ArrayList<>(ApiConfig.get().getSourceBeanList());
+                if (requestList.size() > 0) {
+                    ArrayList<SourceBean> siteKey = new ArrayList<>();
+                    for (SourceBean bean : requestList) {
+                        if (!bean.isSearchable()) {
+                            continue;
+                        }
+                        if (mCheckSources != null && !mCheckSources.containsKey(bean.getKey())) {
+                            continue;
+                        }
+                        siteKey.add(bean);
+                    }
+                    SourceBean homeSource = ApiConfig.get().getHomeSourceBean();
+                    SourceBean gs0 = new SourceBean();
+                    gs0.setKey("filter__home");
+                    gs0.setName("默认源: " + homeSource.getName());
+                    siteKey.remove(homeSource);
+                    siteKey.add(0, gs0);
+                    SourceBean gs1 = new SourceBean();
+                    gs1.setKey("");
+                    gs1.setName("全局搜索");
+                    siteKey.add(0, gs1);
+
+                    if (TextUtils.isEmpty(sKey)) {
+                        i = 0;
+                    } else if (sKey.equals("filter__home")) {
+                        i = 1;
+                    } else {
+                        SourceBean sourceBean = ApiConfig.get().getSource(sKey);
+                        if (sourceBean != null) {
+                            i = siteKey.indexOf(sourceBean);
+                        } else {
+                            i = -1;
+                        }
+                    }
+
+                    SelectDialog<SourceBean> dialog = new SelectDialog<>(SearchActivity.this);
+                    TvRecyclerView tvRecyclerView = dialog.findViewById(R.id.list);
+                    int spanCount;
+                    spanCount = (int)Math.floor(siteKey.size()/10.0);
+                    spanCount = Math.min(spanCount, 3);
+                    tvRecyclerView.setLayoutManager(new V7GridLayoutManager(dialog.getContext(), spanCount+1));
+                    ConstraintLayout cl_root = dialog.findViewById(R.id.cl_root);
+                    ViewGroup.LayoutParams clp = cl_root.getLayoutParams();
+                    clp.width = AutoSizeUtils.mm2px(dialog.getContext(), 340+250*spanCount);
+                    dialog.setTip("搜索数据源");
+                    dialog.setAdapter(tvRecyclerView, new SelectDialogAdapter.SelectDialogInterface<SourceBean>() {
+                        @Override
+                        public void click(SourceBean value, int pos) {
+                            filterBtn.setText(value.getName());
+                            sKey = value.getKey();
+                            SettingsUtil.hkPut(HawkConfig.SEARCH_FILTER_KEY, sKey);
+                            dialog.dismiss();
+                            //search(wd)
+                        }
+
+                        @Override
+                        public String getDisplay(SourceBean val) {
+                            return val.getName();
+                        }
+                    }, new DiffUtil.ItemCallback<SourceBean>() {
+                        @Override
+                        public boolean areItemsTheSame(@NonNull @NotNull SourceBean oldItem, @NonNull @NotNull SourceBean newItem) {
+                            return oldItem == newItem;
+                        }
+
+                        @Override
+                        public boolean areContentsTheSame(@NonNull @NotNull SourceBean oldItem, @NonNull @NotNull SourceBean newItem) {
+                            return oldItem.getKey().equals(newItem.getKey());
+                        }
+                    }, siteKey, i);
+                    dialog.show();
+                } else {
+                    Toast.makeText(mContext, "无搜索源", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        
         tvSearchCheckbox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -268,7 +371,6 @@ public class SearchActivity extends BaseActivity {
                 mSearchCheckboxDialog.show();
             }
         });
-        setLoadSir(llLayout);
     }
 
     private void initViewModel() {
@@ -398,11 +500,7 @@ public class SearchActivity extends BaseActivity {
 
     private void initCheckedSourcesForSearch() {
         mCheckSources = SearchHelper.getSourcesForSearch();
-    }
-
-    public static void setCheckedSourcesForSearch(HashMap<String, String> checkedSources) {
-        mCheckSources = checkedSources;
-    }
+    }    
 
     private void search(String title) {
         cancel();
@@ -432,17 +530,30 @@ public class SearchActivity extends BaseActivity {
         }
         searchExecutorService = Executors.newFixedThreadPool(5);
         List<SourceBean> searchRequestList = new ArrayList<>();
-        searchRequestList.addAll(ApiConfig.get().getSourceBeanList());
-        SourceBean home = ApiConfig.get().getHomeSourceBean();
-        searchRequestList.remove(home);
-        searchRequestList.add(0, home);
+        boolean equals = this.sKey.equals("filter__home");
+        if (equals) {
+            SourceBean home = ApiConfig.get().getHomeSourceBean();
+            if (home.isSearchable()) {
+                searchRequestList.add(home);
+            } else {
+                Toast.makeText(mContext, "当前源不支持搜索,自动切换到全局搜索", Toast.LENGTH_SHORT).show();
+                searchRequestList.addAll(ApiConfig.get().getSourceBeanList());
+            }
+        } else if (TextUtils.isEmpty(sKey) || ApiConfig.get().getSource(sKey) == null) {
+            searchRequestList.addAll(ApiConfig.get().getSourceBeanList());
+            SourceBean home = ApiConfig.get().getHomeSourceBean();
+            searchRequestList.remove(home);
+            searchRequestList.add(0, home);
+        } else {
+            searchRequestList.add(ApiConfig.get().getSource(sKey));
+        }        
 
         ArrayList<String> siteKey = new ArrayList<>();
         for (SourceBean bean : searchRequestList) {
             if (!bean.isSearchable()) {
                 continue;
             }
-            if (mCheckSources != null && !mCheckSources.containsKey(bean.getKey())) {
+            if (!equals && mCheckSources != null && !mCheckSources.containsKey(bean.getKey())) {
                 continue;
             }
             siteKey.add(bean.getKey());
