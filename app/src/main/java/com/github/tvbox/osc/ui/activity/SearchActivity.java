@@ -257,13 +257,7 @@ public class SearchActivity extends BaseActivity {
         
         setLoadSir(llLayout);
         
-        this.sKey = (String) SettingsUtil.hkGet(HawkConfig.SEARCH_FILTER_KEY, "");
-        String string;
-        if (TextUtils.isEmpty(this.sKey)) {
-            string = "全局搜索";
-        } else if (this.sKey.equals("filter__home")) {
-            string = "默认源: " + ApiConfig.get().getHomeSourceBean().getName();
-        } 
+        this.sKey = (String) SettingsUtil.hkGet(HawkConfig.SEARCH_FILTER_KEY, "");       
         
         tvSearchCheckbox.setOnClickListener(new View.OnClickListener() {
             @Override
