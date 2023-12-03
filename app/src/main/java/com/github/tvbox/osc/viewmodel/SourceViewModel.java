@@ -5,7 +5,7 @@ import android.util.Base64;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-
+import com.github.catvod.crawler.JsLoader;
 import com.github.catvod.crawler.Spider;
 import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.base.App;
@@ -64,6 +64,32 @@ public class SourceViewModel extends ViewModel {
     public MutableLiveData<AbsXml> quickSearchResult;
     public MutableLiveData<AbsXml> detailResult;
     public MutableLiveData<JSONObject> playResult;
+    private ExecutorService searchExecutorService;
+    
+    public void initExecutor() {
+        if (searchExecutorService != null) {
+            searchExecutorService.shutdownNow();
+            searchExecutorService = null;
+            JsLoader.stopAll();
+        }
+        searchExecutorService = Executors.newFixedThreadPool(5);
+    }
+    
+    public void execute(Runnable runnable) {
+        if (searchExecutorService != null) {
+            searchExecutorService.execute(runnable);
+        }
+    }
+    
+    public List<Runnable> shutdownNow() {
+        return searchExecutorService == null ? new ArrayList<>() : searchExecutorService.shutdownNow();
+    }
+    
+    public void destroyExecutor() {
+        if (searchExecutorService != null) {
+            searchExecutorService = null;
+        }
+    }
 
     public SourceViewModel() {
         sortResult = new MutableLiveData<>();

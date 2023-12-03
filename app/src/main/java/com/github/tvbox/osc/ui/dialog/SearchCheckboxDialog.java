@@ -46,12 +46,6 @@ public class SearchCheckboxDialog extends BaseDialog {
         initView(context);
     }
 
-    @Override
-    public void dismiss() {
-        checkboxSearchAdapter.setMCheckedSources();
-        super.dismiss();
-    }
-
     protected void initView(Context context) {
         mGridView = findViewById(R.id.mGridView);
         checkAll = findViewById(R.id.checkAll);
@@ -68,7 +62,7 @@ public class SearchCheckboxDialog extends BaseDialog {
             }
         });
         mGridView.setHasFixedSize(true);
-
+        
         // Multi Column Selection
         int size = mSourceList.size();
         int spanCount = (int) Math.floor(size / 10);
@@ -101,11 +95,11 @@ public class SearchCheckboxDialog extends BaseDialog {
         checkAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FastClickCheckUtil.check(view);
-                mCheckSourcees = new HashMap<>();
-                assert mSourceList != null;
+                FastClickCheckUtil.check(view);                
                 for (SourceBean sourceBean : mSourceList) {
-                    mCheckSourcees.put(sourceBean.getKey(), "1");
+                	if (!mCheckSourcees.containsKey(sourceBean.getKey())) {
+                        mCheckSourcees.put(sourceBean.getKey(), "1");
+                    }
                 }
                 checkboxSearchAdapter.setData(mSourceList, mCheckSourcees);
             }
@@ -114,7 +108,14 @@ public class SearchCheckboxDialog extends BaseDialog {
             @Override
             public void onClick(View view) {
                 FastClickCheckUtil.check(view);
-                mCheckSourcees = new HashMap<>();
+                if (mCheckSourcees.size() <= 0) {
+                    return;
+                }
+                for(SourceBean sourceBean : mSourceList) {
+                    if (mCheckSourcees.containsKey(sourceBean.getKey())) {
+                        mCheckSourcees.remove(sourceBean.getKey());
+                    }
+                }
                 checkboxSearchAdapter.setData(mSourceList, mCheckSourcees);
             }
         });

@@ -29,6 +29,7 @@ public class HawkConfig {
     public static final String HOME_SEARCH_POSITION = "search_position"; // true=Up, false=Down
     public static final String HOME_MENU_POSITION = "menu_position";     // true=Up, false=Down
 	public static final String HOME_DEFAULT_SHOW = "home_default_show";  //启动时直接进直播的开关
+	public static final String FAST_SEARCH_MODE = "fast_search_mode";
 
     // Player Settings
     public static final String SHOW_PREVIEW = "show_preview";
@@ -45,6 +46,7 @@ public class HawkConfig {
     public static final String DEFAULT_PARSE = "parse_default";
     public static final String PARSE_WEBVIEW = "parse_webview"; // true 系统 false xwalk
     public static final String SEARCH_VIEW = "search_view";     // 0 列表 1 缩略图
+    public static final String SEARCH_FILTER_KEY = "search_filter_key";
     public static final String SOURCES_FOR_SEARCH = "checked_sources_for_search";
     public static final String STORAGE_DRIVE_SORT = "storage_drive_sort";
     public static final String SUBTITLE_TEXT_SIZE = "subtitle_text_size";
