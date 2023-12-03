@@ -44,7 +44,7 @@ public class CheckboxSearchAdapter extends ListAdapter<SourceBean, CheckboxSearc
         data.addAll(newData);
         setCheckedSource(checkedSources);
         notifyDataSetChanged();
-        //SearchHelper.putCheckedSources(checkedSources);
+        SearchHelper.putCheckedSources(checkedSources);
     }   
 
     @Override
@@ -70,7 +70,7 @@ public class CheckboxSearchAdapter extends ListAdapter<SourceBean, CheckboxSearc
                 } else {
                     mCheckedSources.remove(sourceBean.getKey());
                 }
-                //SearchHelper.putCheckedSource(sourceBean.getKey(), isChecked);
+                SearchHelper.putCheckedSource(sourceBean.getKey(), isChecked);
                 notifyItemChanged(pos);
             }
         });
