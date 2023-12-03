@@ -11,9 +11,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class SearchHelper {
-
+	private static final Pattern p = Pattern.compile("\\D+|(?:19|20)\\d{2}", Pattern.MULTILINE);
+	
     public static HashMap<String, String> getSourcesForSearch() {
         HashMap<String, String> mCheckSources;
         try {
