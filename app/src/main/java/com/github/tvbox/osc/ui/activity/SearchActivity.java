@@ -263,10 +263,7 @@ public class SearchActivity extends BaseActivity {
             string = "全局搜索";
         } else if (this.sKey.equals("filter__home")) {
             string = "默认源: " + ApiConfig.get().getHomeSourceBean().getName();
-        } else {
-            SourceBean sourceBean = ApiConfig.get().getSource(this.sKey);
-            string = sourceBean != null ? sourceBean.getName() : "全局搜索";
-        }
+        } 
         
         tvSearchCheckbox.setOnClickListener(new View.OnClickListener() {
             @Override
