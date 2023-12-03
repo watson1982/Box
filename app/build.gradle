@@ -78,7 +78,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.4.0'
     implementation files('libs\\thunder.jar')
     implementation project(path: ':quickjs')
-
+    implementation project(path: ':jieba_android')
     annotationProcessor 'androidx.room:room-compiler:2.5.1'
     implementation 'androidx.room:room-runtime:2.5.1'
     implementation 'androidx.multidex:multidex:2.0.1'
