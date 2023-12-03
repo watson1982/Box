@@ -438,18 +438,30 @@ public class SearchActivity extends BaseActivity {
             allRunCount.set(0);
         }
         searchExecutorService = Executors.newFixedThreadPool(5);
-        List<SourceBean> searchRequestList = new ArrayList<>();
-        searchRequestList.addAll(ApiConfig.get().getSourceBeanList());
-        SourceBean home = ApiConfig.get().getHomeSourceBean();
-        searchRequestList.remove(home);
-        searchRequestList.add(0, home);
-
+        List<SourceBean> searchRequestList = new ArrayList<>();     
+        boolean equals = this.sKey.equals("filter__home");
+        if (equals) {
+            SourceBean home = ApiConfig.get().getHomeSourceBean();
+            if (home.isSearchable()) {
+                searchRequestList.add(home);
+            } else {
+                Toast.makeText(mContext, "当前源不支持搜索,自动切换到全局搜索", Toast.LENGTH_SHORT).show();
+                searchRequestList.addAll(ApiConfig.get().getSourceBeanList());
+            }
+        } else if (TextUtils.isEmpty(sKey) || ApiConfig.get().getSource(sKey) == null) {
+            searchRequestList.addAll(ApiConfig.get().getSourceBeanList());
+            SourceBean home = ApiConfig.get().getHomeSourceBean();
+            searchRequestList.remove(home);
+            searchRequestList.add(0, home);
+        } else {
+            searchRequestList.add(ApiConfig.get().getSource(sKey));
+        }
         ArrayList<String> siteKey = new ArrayList<>();
         for (SourceBean bean : searchRequestList) {
             if (!bean.isSearchable()) {
                 continue;
             }
-            if (mCheckSources != null && !mCheckSources.containsKey(bean.getKey())) {
+            if (!equals && mCheckSources != null && !mCheckSources.containsKey(bean.getKey())) {
                 continue;
             }
             siteKey.add(bean.getKey());
