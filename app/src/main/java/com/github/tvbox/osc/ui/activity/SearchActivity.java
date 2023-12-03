@@ -15,10 +15,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DiffUtil;
+
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.github.catvod.crawler.JsLoader;
 import com.github.tvbox.osc.R;
@@ -44,11 +46,12 @@ import com.github.tvbox.osc.util.HawkConfig;
 import com.github.tvbox.osc.util.SearchHelper;
 import com.github.tvbox.osc.util.SettingsUtil;
 import com.github.tvbox.osc.viewmodel.SourceViewModel;
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.jieba_android.JiebaSegmenter;
+import com.jieba_android.RequestCallback;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.AbsCallback;
 import com.lzy.okgo.model.Response;
@@ -61,12 +64,14 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import me.jessyan.autosize.utils.AutoSizeUtils;
+
 /**
  * @author pj567
  * @date :2020/12/23
@@ -87,10 +92,13 @@ public class SearchActivity extends BaseActivity {
     private PinyinAdapter wordAdapter;
     private String searchTitle = "";
     private ImageView tvSearchCheckbox;
+    private TextView filterBtn;
+    
+    private List<String> fenci;    
+    private String sKey;
+    
     private HashMap<String, String> mCheckSources = null;
     private SearchCheckboxDialog mSearchCheckboxDialog = null;
-    private TextView filterBtn;
-    private String sKey;
 
     @Override
     protected int getLayoutResID() {
@@ -101,7 +109,7 @@ public class SearchActivity extends BaseActivity {
 
     @Override
     protected void init() {
-        disableKeyboard(SearchActivity.this);
+    	disableKeyboard(SearchActivity.this);
         initView();
         initViewModel();
         initData();
@@ -115,7 +123,7 @@ public class SearchActivity extends BaseActivity {
         hasKeyBoard = false;
         activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
     }
-    
+
     /*
      * 启用软键盘
      * @param activity Activity
@@ -128,7 +136,7 @@ public class SearchActivity extends BaseActivity {
     public void openSystemKeyBoard() {
         InputMethodManager imm = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(this.getCurrentFocus(), InputMethodManager.SHOW_FORCED);
-    }
+    }    
 
     private List<Runnable> pauseRunnable = null;
     
@@ -146,7 +154,7 @@ public class SearchActivity extends BaseActivity {
             pauseRunnable.clear();
             pauseRunnable = null;
         }
-    }    
+    }
 
     private void initView() {
         EventBus.getDefault().register(this);
@@ -154,6 +162,7 @@ public class SearchActivity extends BaseActivity {
         etSearch = findViewById(R.id.etSearch);
         tvSearch = findViewById(R.id.tvSearch);
         tvSearchCheckbox = findViewById(R.id.tvSearchCheckbox);
+        filterBtn = findViewById(R.id.filterBtn);
         tvClear = findViewById(R.id.tvClear);
         tvAddress = findViewById(R.id.tvAddress);
         ivQRCode = findViewById(R.id.ivQRCode);
@@ -164,7 +173,6 @@ public class SearchActivity extends BaseActivity {
         mGridViewWord.setLayoutManager(new V7LinearLayoutManager(this.mContext, 1, false));
         wordAdapter = new PinyinAdapter();
         mGridViewWord.setAdapter(wordAdapter);
-        filterBtn = findViewById(R.id.filterBtn);  
         
         wordAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
@@ -178,7 +186,6 @@ public class SearchActivity extends BaseActivity {
                 }
             }
         });
-        
         mGridView.setHasFixedSize(true);
         // lite
         if (Hawk.get(HawkConfig.SEARCH_VIEW, 0) == 0)
@@ -195,7 +202,7 @@ public class SearchActivity extends BaseActivity {
                 Movie.Video video = searchAdapter.getData().get(position);
                 if (video != null) {
                     try {
-                        if (sourceViewModel != null) {
+                    	if (sourceViewModel != null) {
                             pauseRunnable = sourceViewModel.shutdownNow();
                             JsLoader.stopAll();
                             sourceViewModel.destroyExecutor();
@@ -244,6 +251,7 @@ public class SearchActivity extends BaseActivity {
                 SearchActivity.this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
             }
         });
+        
         keyboard.setOnSearchKeyListener(new SearchKeyboard.OnSearchKeyListener() {
             @Override
             public void onSearchKey(int pos, String key) {
@@ -269,9 +277,7 @@ public class SearchActivity extends BaseActivity {
                 }
             }
         });
-        
         setLoadSir(llLayout);
-        
         this.sKey = (String) SettingsUtil.hkGet(HawkConfig.SEARCH_FILTER_KEY, "");
         String string;
         if (TextUtils.isEmpty(this.sKey)) {
@@ -364,7 +370,7 @@ public class SearchActivity extends BaseActivity {
                     Toast.makeText(mContext, "无搜索源", Toast.LENGTH_SHORT).show();
                 }
             }
-        });       
+        });
         
         tvSearchCheckbox.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -387,7 +393,7 @@ public class SearchActivity extends BaseActivity {
                 });
                 mSearchCheckboxDialog.show();
             }
-        });        
+        });
     }
 
     private void initViewModel() {
@@ -398,31 +404,20 @@ public class SearchActivity extends BaseActivity {
      * 拼音联想
      */
     private void loadRec(String key) {
-        OkGo.get("https://tv.aiseet.atianqi.com/i-tvbin/qtv_video/search/get_search_smart_box")
-                .params("format", "json")
-                .params("page_num", 0)
-                .params("page_size", 50) //随便改
+        OkGo.<String>get("https://suggest.video.iqiyi.com/")
+                .params("if", "mobile")
                 .params("key", key)
-                .execute(new AbsCallback() {
+                .execute(new AbsCallback<String>() {
                     @Override
-                    public void onSuccess(Response response) {
+                    public void onSuccess(Response<String> response) {
                         try {
-                            ArrayList hots = new ArrayList<>();
-                            String result = (String) response.body();
-                            Gson gson = new Gson();
-                            JsonElement json = gson.fromJson(result, JsonElement.class);
-                            JsonArray groupDataArr = json.getAsJsonObject()
-                                    .get("data").getAsJsonObject()
-                                    .get("search_data").getAsJsonObject()
-                                    .get("vecGroupData").getAsJsonArray()
-                                    .get(0).getAsJsonObject()
-                                    .get("group_data").getAsJsonArray();
-                            for (JsonElement groupDataElement : groupDataArr) {
-                                JsonObject groupData = groupDataElement.getAsJsonObject();
-                                String keywordTxt = groupData.getAsJsonObject("dtReportInfo")
-                                        .getAsJsonObject("reportData")
-                                        .get("keyword_txt").getAsString();
-                                hots.add(keywordTxt.trim());
+                            ArrayList<String> hots = new ArrayList<>();
+                            String result = response.body();
+                            JsonObject json = JsonParser.parseString(result).getAsJsonObject();
+                            JsonArray itemList = json.get("data").getAsJsonArray();
+                            for (JsonElement ele : itemList) {
+                                JsonObject obj = (JsonObject) ele;
+                                hots.add(obj.get("name").getAsString().trim().replaceAll("[<>《》\\-]", ""));
                             }
                             wordAdapter.setNewData(hots);
                         } catch (Throwable th) {
@@ -453,12 +448,9 @@ public class SearchActivity extends BaseActivity {
             }
         }
         // 加载热词
-        loadHotSearch();
-    }
-
-    //load hot search
-    private void loadHotSearch() {
         OkGo.<String>get("https://node.video.qq.com/x/api/hot_search")
+//        OkGo.<String>get("https://api.web.360kan.com/v1/rank")
+//                .params("cat", "1")
                 .params("channdlId", "0")
                 .params("_", System.currentTimeMillis())
                 .execute(new AbsCallback<String>() {
@@ -466,22 +458,12 @@ public class SearchActivity extends BaseActivity {
                     public void onSuccess(Response<String> response) {
                         try {
                             ArrayList<String> hots = new ArrayList<>();
-                            JsonObject mapResult = JsonParser.parseString(response.body())
-                                    .getAsJsonObject()
-                                    .get("data").getAsJsonObject()
-                                    .get("mapResult").getAsJsonObject();
-                            List<String> groupIndex = Arrays.asList("0", "1", "2", "3", "5");
-                            for (String index : groupIndex) {
-                                JsonArray itemList = mapResult.get(index).getAsJsonObject()
-                                        .get("listInfo").getAsJsonArray();
-                                for (JsonElement ele : itemList) {
-                                    JsonObject obj = (JsonObject) ele;
-                                    String hotKey = obj.get("title").getAsString().trim().replaceAll("<|>|《|》|-", "").split(" ")[0];
-                                    if (!hots.contains(hotKey))
-                                        hots.add(hotKey);
-                                }
+                            JsonArray itemList = JsonParser.parseString(response.body()).getAsJsonObject().get("data").getAsJsonObject().get("mapResult").getAsJsonObject().get("0").getAsJsonObject().get("listInfo").getAsJsonArray();
+//                            JsonArray itemList = JsonParser.parseString(response.body()).getAsJsonObject().get("data").getAsJsonArray();
+                            for (JsonElement ele : itemList) {
+                                JsonObject obj = (JsonObject) ele;
+                                hots.add(obj.get("title").getAsString().trim().replaceAll("[<>《》\\-]", "").split(" ")[0]);
                             }
-
                             wordAdapter.setNewData(hots);
                         } catch (Throwable th) {
                             th.printStackTrace();
@@ -529,20 +511,33 @@ public class SearchActivity extends BaseActivity {
 
     private void initCheckedSourcesForSearch() {
         mCheckSources = SearchHelper.getSourcesForSearch();
-    }    
-
+    }
+   
     private void search(String title) {
         cancel();
-        showLoading();
-        etSearch.setText(title);
+        showLoading();        
         this.searchTitle = title;
         mGridView.setVisibility(View.INVISIBLE);
         searchAdapter.setNewData(new ArrayList<>());
-        searchResult();
-    }
-    
-    private AtomicInteger allRunCount = new AtomicInteger(0);
+        // 分词
+        JiebaSegmenter.getJiebaSegmenterSingleton().getDividedStringAsync(searchTitle, new RequestCallback<ArrayList<String>>() {
+            @Override
+            public void onSuccess(ArrayList<String> result) {
+                fenci = result;
+                searchResult();
+            }
 
+            @Override
+            public void onError(String errorMsg) {
+
+            }
+        });
+        //fenci = JiebaSegmenter.getJiebaSegmenterSingleton().getDividedString(searchTitle);
+        //searchResult();
+    }
+
+    private AtomicInteger allRunCount = new AtomicInteger(0);
+    
     private void searchResult() {
         try {
             sourceViewModel.initExecutor();
@@ -552,8 +547,9 @@ public class SearchActivity extends BaseActivity {
             searchAdapter.setNewData(new ArrayList<>());
             allRunCount.set(0);
         }
-        
-        List<SourceBean> searchRequestList = new ArrayList<>();     
+
+        List<SourceBean> searchRequestList = new ArrayList<>();
+
         boolean equals = this.sKey.equals("filter__home");
         if (equals) {
             SourceBean home = ApiConfig.get().getHomeSourceBean();
@@ -571,6 +567,7 @@ public class SearchActivity extends BaseActivity {
         } else {
             searchRequestList.add(ApiConfig.get().getSource(sKey));
         }
+
         ArrayList<String> siteKey = new ArrayList<>();
         for (SourceBean bean : searchRequestList) {
             if (!bean.isSearchable()) {
@@ -583,10 +580,11 @@ public class SearchActivity extends BaseActivity {
             allRunCount.incrementAndGet();
         }
         if (siteKey.size() <= 0) {
-            Toast.makeText(mContext, getString(R.string.search_site), Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "没有指定搜索源", Toast.LENGTH_SHORT).show();
             showEmpty();
             return;
         }
+
         for (String key : siteKey) {
             sourceViewModel.execute(new Runnable() {
                 @Override
@@ -595,13 +593,15 @@ public class SearchActivity extends BaseActivity {
                 }
             });
         }
-    }    
+    }
 
     private void searchData(AbsXml absXml) {
         if (absXml != null && absXml.movie != null && absXml.movie.videoList != null && absXml.movie.videoList.size() > 0) {
             List<Movie.Video> data = new ArrayList<>();
             for (Movie.Video video : absXml.movie.videoList) {
-                data.add(video);
+            	if (SearchHelper.searchContains(video.name, fenci)) {
+                    data.add(video);
+                }    
             }
             if (searchAdapter.getData().size() > 0) {
                 searchAdapter.addData(data);
@@ -624,7 +624,7 @@ public class SearchActivity extends BaseActivity {
     private void cancel() {
         OkGo.getInstance().cancelTag("search");
     }
-
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -647,5 +647,5 @@ public class SearchActivity extends BaseActivity {
         etSearch.requestFocus();
         etSearch.setText(inputMsgEvent.getText());
         search(inputMsgEvent.getText());
-    }
+    }    
 }
