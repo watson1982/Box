@@ -409,11 +409,7 @@ public class SearchActivity extends BaseActivity {
 
     private void initCheckedSourcesForSearch() {
         mCheckSources = SearchHelper.getSourcesForSearch();
-    }
-
-    public void setCheckedSourcesForSearch(HashMap<String, String> checkedSources) {
-        mCheckSources = checkedSources;
-    }
+    }    
 
     private void search(String title) {
         cancel();
