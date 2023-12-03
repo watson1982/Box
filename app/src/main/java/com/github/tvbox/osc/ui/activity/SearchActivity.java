@@ -88,7 +88,7 @@ public class SearchActivity extends BaseActivity {
     private PinyinAdapter wordAdapter;
     private String searchTitle = "";
     private ImageView tvSearchCheckbox;
-    private static HashMap<String, String> mCheckSources = null;
+    private HashMap<String, String> mCheckSources = null;
     private SearchCheckboxDialog mSearchCheckboxDialog = null;
     private TextView filterBtn;
     private String sKey;
@@ -423,7 +423,7 @@ public class SearchActivity extends BaseActivity {
     }
 
     private ExecutorService searchExecutorService = null;
-    private final AtomicInteger allRunCount = new AtomicInteger(0);
+    private AtomicInteger allRunCount = new AtomicInteger(0);
 
     private void searchResult() {
         try {
