@@ -267,7 +267,6 @@ public class SearchActivity extends BaseActivity {
             SourceBean sourceBean = ApiConfig.get().getSource(this.sKey);
             string = sourceBean != null ? sourceBean.getName() : "全局搜索";
         }
-        filterBtn.setText(string);
         
         tvSearchCheckbox.setOnClickListener(new View.OnClickListener() {
             @Override
