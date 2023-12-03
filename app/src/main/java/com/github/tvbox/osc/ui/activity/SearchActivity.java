@@ -255,99 +255,7 @@ public class SearchActivity extends BaseActivity {
             }
         });
         
-        this.sKey = (String) SettingsUtil.hkGet(HawkConfig.SEARCH_FILTER_KEY, "");
-        String string;
-        if (TextUtils.isEmpty(this.sKey)) {
-            string = "全局搜索";
-        } else if (this.sKey.equals("filter__home")) {
-            string = "默认源: " + ApiConfig.get().getHomeSourceBean().getName();
-        } else {
-            SourceBean sourceBean = ApiConfig.get().getSource(this.sKey);
-            string = sourceBean != null ? sourceBean.getName() : "全局搜索";
-        }
-        filterBtn.setText(string);
-        filterBtn.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                int i;
-                List<SourceBean> requestList = new ArrayList<>(ApiConfig.get().getSourceBeanList());
-                if (requestList.size() > 0) {
-                    ArrayList<SourceBean> siteKey = new ArrayList<>();
-                    for (SourceBean bean : requestList) {
-                        if (!bean.isSearchable()) {
-                            continue;
-                        }
-                        if (mCheckSources != null && !mCheckSources.containsKey(bean.getKey())) {
-                            continue;
-                        }
-                        siteKey.add(bean);
-                    }
-                    SourceBean homeSource = ApiConfig.get().getHomeSourceBean();
-                    SourceBean gs0 = new SourceBean();
-                    gs0.setKey("filter__home");
-                    gs0.setName("默认源: " + homeSource.getName());
-                    siteKey.remove(homeSource);
-                    siteKey.add(0, gs0);
-                    SourceBean gs1 = new SourceBean();
-                    gs1.setKey("");
-                    gs1.setName("全局搜索");
-                    siteKey.add(0, gs1);
-
-                    if (TextUtils.isEmpty(sKey)) {
-                        i = 0;
-                    } else if (sKey.equals("filter__home")) {
-                        i = 1;
-                    } else {
-                        SourceBean sourceBean = ApiConfig.get().getSource(sKey);
-                        if (sourceBean != null) {
-                            i = siteKey.indexOf(sourceBean);
-                        } else {
-                            i = -1;
-                        }
-                    }
-
-                    SelectDialog<SourceBean> dialog = new SelectDialog<>(SearchActivity.this);
-                    TvRecyclerView tvRecyclerView = dialog.findViewById(R.id.list);
-                    int spanCount;
-                    spanCount = (int)Math.floor(siteKey.size()/10.0);
-                    spanCount = Math.min(spanCount, 3);
-                    tvRecyclerView.setLayoutManager(new V7GridLayoutManager(dialog.getContext(), spanCount+1));
-                    ConstraintLayout cl_root = dialog.findViewById(R.id.cl_root);
-                    ViewGroup.LayoutParams clp = cl_root.getLayoutParams();
-                    clp.width = AutoSizeUtils.mm2px(dialog.getContext(), 340+250*spanCount);
-                    dialog.setTip("搜索数据源");
-                    dialog.setAdapter(tvRecyclerView, new SelectDialogAdapter.SelectDialogInterface<SourceBean>() {
-                        @Override
-                        public void click(SourceBean value, int pos) {
-                            filterBtn.setText(value.getName());
-                            sKey = value.getKey();
-                            SettingsUtil.hkPut(HawkConfig.SEARCH_FILTER_KEY, sKey);
-                            dialog.dismiss();
-                            //search(wd)
-                        }
-
-                        @Override
-                        public String getDisplay(SourceBean val) {
-                            return val.getName();
-                        }
-                    }, new DiffUtil.ItemCallback<SourceBean>() {
-                        @Override
-                        public boolean areItemsTheSame(@NonNull @NotNull SourceBean oldItem, @NonNull @NotNull SourceBean newItem) {
-                            return oldItem == newItem;
-                        }
-
-                        @Override
-                        public boolean areContentsTheSame(@NonNull @NotNull SourceBean oldItem, @NonNull @NotNull SourceBean newItem) {
-                            return oldItem.getKey().equals(newItem.getKey());
-                        }
-                    }, siteKey, i);
-                    dialog.show();
-                } else {
-                    Toast.makeText(mContext, "无搜索源", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+        setLoadSir(llLayout);
         
         tvSearchCheckbox.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -371,7 +279,7 @@ public class SearchActivity extends BaseActivity {
                 mSearchCheckboxDialog.show();
             }
         });
-        setLoadSir(llLayout);
+        
     }
 
     private void initViewModel() {
