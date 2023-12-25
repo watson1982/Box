@@ -280,9 +280,7 @@ public class DefaultConfig {
 
     public static String[] StoragePermissionGroup() {
         return new String[] {
-                Permission.MANAGE_EXTERNAL_STORAGE,
-                Permission.WRITE_EXTERNAL_STORAGE,
-                Permission.READ_EXTERNAL_STORAGE
+                Permission.MANAGE_EXTERNAL_STORAGE                
         };
     }
 
