@@ -1017,6 +1017,7 @@
 	                android:layout_marginEnd="@dimen/vs_2"
 	                android:layout_marginRight="@dimen/vs_2"
 	                android:drawableLeft="@drawable/vod_skip"
+					android:focusable="true"
 	                android:gravity="center"
 	                android:padding="@dimen/vs_10"
 	                android:textColor="@color/color_FFFFFF"
