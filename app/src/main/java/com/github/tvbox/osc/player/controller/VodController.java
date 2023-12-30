@@ -137,9 +137,9 @@ public class VodController extends BaseController {
 
                         // takagen99: Check if Touch Screen, show back button
                         if (((BaseActivity) mActivity).supportsTouch()) {
-                            mBack.setVisibility(VISIBLE);
-                            showLockView();
+                            mBack.setVisibility(VISIBLE);               
                         }
+                        showLockView();
 
                         if (isKeyUp) {
                             mPlayerTimeStartBtn.requestFocus();
