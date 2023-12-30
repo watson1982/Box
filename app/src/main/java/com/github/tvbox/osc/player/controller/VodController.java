@@ -250,13 +250,13 @@ public class VodController extends BaseController {
     // center BACK button
     LinearLayout mBack;
     
-    //center LOCK button
-    LinearLayout mTopRoot2;
+    //center LOCK button    
     private boolean isLock = false;
     ImageView mLockView;
     LockRunnable lockRunnable = new LockRunnable();
     
-    // screen_display    
+    // screen_display
+    LinearLayout mTopRoot2;
     TextView seekTime; //右上角进度时间显示
     TextView mScreendisplay; //增加屏显开关
 
