@@ -256,6 +256,7 @@ public class VodController extends BaseController {
     LockRunnable lockRunnable = new LockRunnable();
     
     // screen_display
+    TextView mPlayLoadNetSpeedRightTop;
     LinearLayout mTopRoot2;
     TextView seekTime; //右上角进度时间显示
     LinearLayout mScreendisplay; //增加屏显开关
@@ -313,6 +314,8 @@ public class VodController extends BaseController {
         public void run() {
             Date date = new Date();
             SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm aa", Locale.ENGLISH);
+            String speed = PlayerHelper.getDisplaySpeed(mControlWrapper.getTcpSpeed());
+            mPlayLoadNetSpeedRightTop.setText(speed);
             mTime.setText(timeFormat.format(date));
             mHandler.postDelayed(this, 1000);
         }
@@ -421,6 +424,7 @@ public class VodController extends BaseController {
         initSubtitleInfo();
         
         // screen_display
+        mPlayLoadNetSpeedRightTop = findViewById(R.id.tv_play_load_net_speed_right_top);
         mTopRoot2 = findViewById(R.id.tv_top_r_container);
         seekTime = findViewById(R.id.tv_seek_time); //右上角进度时间显示
         mScreendisplay = findViewById(R.id.screen_display); //增加屏显开关
