@@ -258,7 +258,7 @@ public class VodController extends BaseController {
     // screen_display
     LinearLayout mTopRoot2;
     TextView seekTime; //右上角进度时间显示
-    TextView mScreendisplay; //增加屏显开关
+    LinearLayout mScreendisplay; //增加屏显开关
 
     // bottom container
     LinearLayout mBottomRoot;
