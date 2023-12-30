@@ -411,7 +411,8 @@
 
     </FrameLayout>
 
-    <LinearLayout        
+    <ImageView
+        android:id="@+id/tv_lock"
         android:layout_width="@dimen/vs_60"
         android:layout_height="@dimen/vs_60"
         android:layout_gravity="center|left"
@@ -423,15 +424,7 @@
         android:clickable="true"
         android:focusable="true"
         android:gravity="center"
-        android:orientation="horizontal">
-
-        <ImageView
-	        android:id="@+id/tv_lock"
-            android:layout_width="@dimen/vs_40"
-            android:layout_height="@dimen/vs_40"
-            android:layout_gravity="center"
-            android:src="@drawable/icon_unlock" />
-    </LinearLayout>
+        android:src="@drawable/icon_unlock" />
     
     <LinearLayout
         android:id="@+id/tvBackButton"
