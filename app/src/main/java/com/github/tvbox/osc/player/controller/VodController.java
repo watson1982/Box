@@ -251,9 +251,14 @@ public class VodController extends BaseController {
     LinearLayout mBack;
     
     //center LOCK button
+    LinearLayout mTopRoot2;
     private boolean isLock = false;
     ImageView mLockView;
     LockRunnable lockRunnable = new LockRunnable();
+    
+    // screen_display    
+    TextView seekTime; //右上角进度时间显示
+    TextView mScreendisplay; //增加屏显开关
 
     // bottom container
     LinearLayout mBottomRoot;
@@ -414,6 +419,11 @@ public class VodController extends BaseController {
 
         // initialize subtitle
         initSubtitleInfo();
+        
+        // screen_display
+        mTopRoot2 = findViewById(R.id.tv_top_r_container);
+        seekTime = findViewById(R.id.tv_seek_time); //右上角进度时间显示
+        mScreendisplay = findViewById(R.id.screen_display); //增加屏显开关
         
         mLockView.setOnClickListener(new OnClickListener() {
             @Override
@@ -932,6 +942,18 @@ public class VodController extends BaseController {
                 }
             }
         });
+        
+        //屏显开关
+        mTopRoot2.setVisibility(Hawk.get(HawkConfig.SCREEN_DISPLAY, GONE));
+        mScreendisplay.setOnClickListener(new OnClickListener() {@Override
+            public void onClick(View view) {
+                mTopRoot2.setVisibility(mTopRoot2.getVisibility() == VISIBLE ? GONE : VISIBLE);
+                Hawk.put(HawkConfig.SCREEN_DISPLAY, mTopRoot2.getVisibility());              
+                hideBottom();
+                //Toast.makeText(getContext(), "点击显示网速 播放进度 时间", Toast.LENGTH_SHORT).show();
+            }
+        });
+        
     }
     
     public void initLandscapePortraitBtnInfo() {
@@ -1075,6 +1097,7 @@ public class VodController extends BaseController {
         }
         mCurrentTime.setText(PlayerUtils.stringForTimeVod(position));
         mTotalTime.setText(PlayerUtils.stringForTimeVod(duration));
+        seekTime.setText((PlayerUtils.stringForTime(position)) + " | " + (PlayerUtils.stringForTime(duration))); //右上角进度条时间显示
         if (duration > 0) {
             mSeekBar.setEnabled(true);
             int pos = (int) (position * 1.0 / duration * mSeekBar.getMax());
