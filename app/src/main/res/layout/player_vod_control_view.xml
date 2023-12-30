@@ -1016,6 +1016,27 @@
 	                    android:src="@drawable/v_audio" />
 	            </LinearLayout>
 	
+	            <LinearLayout
+	                android:id="@+id/screen_display"
+	                android:layout_width="@dimen/vs_60"
+	                android:layout_height="@dimen/vs_60"
+	                android:layout_gravity="center"
+	                android:layout_marginStart="@dimen/vs_6"
+	                android:layout_marginLeft="@dimen/vs_6"
+	                android:layout_marginEnd="@dimen/vs_6"
+	                android:layout_marginRight="@dimen/vs_6"
+	                android:background="@drawable/button_dialog_vod"
+	                android:focusable="true"
+	                android:gravity="center"
+	                android:orientation="horizontal">
+	
+	                <ImageView
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="@dimen/vs_40"
+	                    android:layout_gravity="center"
+	                    android:src="@drawable/ic_clock_digital" />
+	            </LinearLayout>
+	
 	            <TextView
 	                android:layout_width="1dp"
 	                android:layout_height="20dp"
