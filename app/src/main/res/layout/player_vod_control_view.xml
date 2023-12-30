@@ -424,7 +424,8 @@
         android:clickable="true"
         android:focusable="true"
         android:gravity="center"
-        android:src="@drawable/icon_unlock" />
+        android:src="@drawable/icon_unlock"
+        android:visibility="invisible" />
     
     <LinearLayout
         android:id="@+id/tvBackButton"
