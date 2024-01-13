@@ -336,7 +336,7 @@ public class DetailActivity extends BaseActivity {
         	@Override
             public void onClick(View v) {                
                 //FastClickCheckUtil.check(v);
-                DescDialog descdialog = new DescDialog(mContext);
+                //DescDialog descdialog = new DescDialog(mContext);
                 //  descdialog.setTip("内容简介");
                 //descdialog.setDescribe(removeHtmlTag(mVideo.des));
                 //descdialog.show();
