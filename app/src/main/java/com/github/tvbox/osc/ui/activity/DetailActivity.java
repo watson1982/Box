@@ -332,14 +332,14 @@ public class DetailActivity extends BaseActivity {
                 }
             }
         });
-        tvDesc.setOnClickListener(new View.OnClickListener() {
+        /*tvDesc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 DescDialog descDialog = new DescDialog(mContext);
                 descDialog.show();
             }
-        });
-        /*tvDesc.setOnClickListener(new View.OnClickListener() {@Override
+        });*/
+        tvDesc.setOnClickListener(new View.OnClickListener() {@Override
             public void onClick(View v) {
             	runOnUiThread(new Runnable() {@Override
                     public void run() {
@@ -351,7 +351,7 @@ public class DetailActivity extends BaseActivity {
 		            }
 		        });
             }
-        });*/
+        });
         tvPlayUrl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
