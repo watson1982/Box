@@ -337,10 +337,10 @@ public class DetailActivity extends BaseActivity {
             	runOnUiThread(new Runnable() {@Override
                     public void run() {
 		                FastClickCheckUtil.check(v);
-		                //DescDialog dialog = new DescDialog(mContext);
+		                DescDialog dialog = new DescDialog(mContext);
 		                //  dialog.setTip("内容简介");
-		                //dialog.setDescribe(removeHtmlTag(mVideo.des));
-		                //dialog.show();
+		                dialog.setDescribe(removeHtmlTag(mVideo.des));
+		                dialog.show();
 		            }
 		        });
             }
