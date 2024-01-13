@@ -30,10 +30,10 @@ public class DescDialog extends BaseDialog {
         setCanceledOnTouchOutside(false);
         setCancelable(true);
         setContentView(R.layout.dialog_desc);
-        init(context);
+        //init(context);
     }
 
-    private void init(Context context) {
+ /*private void init(Context context) {
         EventBus.getDefault().register(this);
         setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
@@ -41,5 +41,5 @@ public class DescDialog extends BaseDialog {
                 EventBus.getDefault().unregister(this);
             }
         });       
-    }
+    }*/
 }
