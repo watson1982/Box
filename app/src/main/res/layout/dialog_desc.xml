@@ -11,22 +11,4 @@
     android:paddingRight="@dimen/vs_20"
     android:paddingBottom="@dimen/vs_10">
 
-
-
-            <TextView
-                android:layout_width="@dimen/vs_160"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="@dimen/vs_20"
-                android:layout_marginRight="@dimen/vs_20"
-                android:gravity="center"
-                android:shadowColor="@color/color_000000_60"
-                android:shadowDx="0"
-                android:shadowDy="0"
-                android:shadowRadius="5"
-                android:text="远端tvbox地址"
-                android:textColor="@color/color_FFFFFF"
-                android:textSize="@dimen/ts_20"
-                android:textStyle="bold" />
-
-
 </LinearLayout>
