@@ -1,27 +1,14 @@
 package com.github.tvbox.osc.ui.dialog;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.view.View;
-
+import android.widget.TextView;
 import androidx.annotation.NonNull;
-
-import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.github.tvbox.osc.R;
-import com.github.tvbox.osc.bean.Movie;
-import com.github.tvbox.osc.event.RefreshEvent;
-import com.github.tvbox.osc.ui.adapter.QuickSearchAdapter;
-import com.github.tvbox.osc.ui.adapter.SearchWordAdapter;
-import com.owen.tvrecyclerview.widget.TvRecyclerView;
-import com.owen.tvrecyclerview.widget.V7LinearLayoutManager;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import android.content.DialogInterface;
+import android.view.View;
+import org.greenrobot.eventbus.EventBus;
 
 public class DescDialog extends BaseDialog {    
 
@@ -30,10 +17,10 @@ public class DescDialog extends BaseDialog {
         setCanceledOnTouchOutside(false);
         setCancelable(true);
         setContentView(R.layout.dialog_desc);
-        //init(context);
+        init(context);
     }
 
- /*private void init(Context context) {
+    private void init(Context context) {
         EventBus.getDefault().register(this);
         setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
@@ -41,5 +28,5 @@ public class DescDialog extends BaseDialog {
                 EventBus.getDefault().unregister(this);
             }
         });       
-    }*/
+    }
 }
