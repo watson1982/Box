@@ -13,7 +13,7 @@ import org.greenrobot.eventbus.EventBus;
 public class DescDialog extends BaseDialog {    
 
     public DescDialog(@NonNull @NotNull Context context) {
-        super(context, R.style.CustomDialogStyleDim);
+        super(context);
         setCanceledOnTouchOutside(false);
         setCancelable(true);
         setContentView(R.layout.dialog_desc);
