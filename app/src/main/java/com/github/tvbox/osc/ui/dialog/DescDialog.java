@@ -33,7 +33,7 @@ public class DescDialog extends BaseDialog {
         super(context, R.style.CustomDialogStyleDim);
         setCanceledOnTouchOutside(false);
         setCancelable(true);
-        setContentView(R.layout.dialog_quick_search);
+        setContentView(R.layout.dialog_desc);
         init(context);
     }
 
@@ -46,8 +46,6 @@ public class DescDialog extends BaseDialog {
             public void onDismiss(DialogInterface dialog) {
                 EventBus.getDefault().unregister(this);
             }
-        });
-        
-        
+        });       
     }
 }
