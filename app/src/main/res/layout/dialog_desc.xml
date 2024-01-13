@@ -22,27 +22,7 @@
             android:textColor="@color/color_000000_80"
             android:textSize="@dimen/ts_22" />
 
-        <com.owen.tvrecyclerview.widget.TvRecyclerView
-            android:id="@+id/mGridViewWord"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/vs_50"
-            android:layout_marginTop="@dimen/vs_10"
-            android:layout_marginBottom="@dimen/vs_10"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            app:tv_horizontalSpacingWithMargins="@dimen/vs_5"
-            app:tv_selectedItemIsCentered="true"
-            app:tv_verticalSpacingWithMargins="@dimen/vs_5" />
 
-        <com.owen.tvrecyclerview.widget.TvRecyclerView
-            android:id="@+id/mGridView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            app:tv_horizontalSpacingWithMargins="@dimen/vs_5"
-            app:tv_selectedItemIsCentered="true"
-            app:tv_verticalSpacingWithMargins="@dimen/vs_5" />
 
     </LinearLayout>
 </FrameLayout>
