@@ -332,7 +332,7 @@ public class DetailActivity extends BaseActivity {
                 }
             }
         });
-        tvDesc.setOnClickListener(new View.OnClickListener() {
+        /*tvDesc.setOnClickListener(new View.OnClickListener() {
         	@Override
             public void onClick(View v) {
             	runOnUiThread(new Runnable() {@Override
@@ -345,7 +345,7 @@ public class DetailActivity extends BaseActivity {
 		            }
 		        });
             }
-        });
+        });*/
         tvPlayUrl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
