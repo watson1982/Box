@@ -336,10 +336,10 @@ public class DetailActivity extends BaseActivity {
         	@Override
             public void onClick(View v) {                
                 FastClickCheckUtil.check(v);
-                DescDialog dialog = new DescDialog(mContext);
-                //  dialog.setTip("内容简介");
-                dialog.setDescribe(removeHtmlTag(mVideo.des));
-                dialog.show();
+                DescDialog descdialog = new DescDialog(mContext);
+                //  descdialog.setTip("内容简介");
+                descdialog.setDescribe(removeHtmlTag(mVideo.des));
+                descdialog.show();
             }
         });
         tvPlayUrl.setOnClickListener(new View.OnClickListener() {
@@ -1105,6 +1105,7 @@ public class DetailActivity extends BaseActivity {
         tvPlay.setFocusable(!fullWindows);
         tvSort.setFocusable(!fullWindows);
         tvPush.setFocusable(!fullWindows);
+        tvDesc.setFocusable(!fullWindows);
         tvCollect.setFocusable(!fullWindows);
         tvQuickSearch.setFocusable(!fullWindows);
         toggleSubtitleTextSize();
