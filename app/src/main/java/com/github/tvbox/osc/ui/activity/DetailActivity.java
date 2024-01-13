@@ -339,7 +339,7 @@ public class DetailActivity extends BaseActivity {
                 DescDialog descdialog = new DescDialog(mContext);
                 //  descdialog.setTip("内容简介");
                 //descdialog.setDescribe(removeHtmlTag(mVideo.des));
-                descdialog.show();
+                //descdialog.show();
             }
         });
         tvPlayUrl.setOnClickListener(new View.OnClickListener() {
