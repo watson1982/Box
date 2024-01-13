@@ -332,14 +332,17 @@ public class DetailActivity extends BaseActivity {
                 }
             }
         });
-        tvDesc.setOnClickListener(new View.OnClickListener() {
-        	@Override
-            public void onClick(View v) {                
-                //FastClickCheckUtil.check(v);
-                //DescDialog descdialog = new DescDialog(mContext);
-                //  descdialog.setTip("内容简介");
-                //descdialog.setDescribe(removeHtmlTag(mVideo.des));
-                //descdialog.show();
+        tvDesc.setOnClickListener(new View.OnClickListener() {@Override
+            public void onClick(View v) {
+            	runOnUiThread(new Runnable() {@Override
+                    public void run() {
+		                FastClickCheckUtil.check(v);
+		                //DescDialog dialog = new DescDialog(mContext);
+		                //  dialog.setTip("内容简介");
+		                //dialog.setDescribe(removeHtmlTag(mVideo.des));
+		                //dialog.show();
+		            }
+		        });
             }
         });
         tvPlayUrl.setOnClickListener(new View.OnClickListener() {
