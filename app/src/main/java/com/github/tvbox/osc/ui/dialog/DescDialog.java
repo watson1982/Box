@@ -34,7 +34,7 @@ public class DescDialog extends BaseDialog {
         setCanceledOnTouchOutside(false);
         setCancelable(true);
         setContentView(R.layout.dialog_quick_search);
-        init(context);
+       
     }
 
 
