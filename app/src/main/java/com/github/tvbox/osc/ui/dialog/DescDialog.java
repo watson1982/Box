@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PushDialog extends BaseDialog {
+public class DescDialog extends BaseDialog {
 
     private EditText etAddr;
     private EditText etPort;
