@@ -15,7 +15,7 @@ public class DescDialog extends BaseDialog {
     public DescDialog(@NonNull @NotNull Context context) {
         super(context);       
         setContentView(R.layout.dialog_desc);
-        init(context);
+       // init(context);
     }
     
     public void setDescribe(String describe) {
