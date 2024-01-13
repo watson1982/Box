@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:lineSpacingMultiplier="1.2"
             android:padding="@dimen/vs_20"
-            android:textColor="@color/color_000000_80"
+            android:textColor="@color/color_FFFFFF"
             android:textSize="@dimen/ts_26" />
 
     </androidx.core.widget.NestedScrollView>
