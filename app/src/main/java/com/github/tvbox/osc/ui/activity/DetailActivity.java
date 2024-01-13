@@ -336,7 +336,7 @@ public class DetailActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 DescDialog descDialog = new DescDialog(mContext);
-                DescDialog.show();
+                descDialog.show();
             }
         });
         /*tvDesc.setOnClickListener(new View.OnClickListener() {@Override
