@@ -27,11 +27,11 @@ public class DescDialog extends BaseDialog {
 
     private void init(Context context) {
         EventBus.getDefault().register(this);
-       /* setOnDismissListener(new DialogInterface.OnDismissListener() {
+        setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
                 EventBus.getDefault().unregister(this);
             }
-        });       */
+        });
     }
 }
