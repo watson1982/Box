@@ -23,11 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DescDialog extends BaseDialog {
-    private SearchWordAdapter searchWordAdapter;
-    private QuickSearchAdapter searchAdapter;
-    private TvRecyclerView mGridView;
-    private TvRecyclerView mGridViewWord;
+public class DescDialog extends BaseDialog {    
 
     public DescDialog(@NonNull @NotNull Context context) {
         super(context, R.style.CustomDialogStyleDim);
@@ -36,8 +32,6 @@ public class DescDialog extends BaseDialog {
         setContentView(R.layout.dialog_desc);
         init(context);
     }
-
-
 
     private void init(Context context) {
         EventBus.getDefault().register(this);
