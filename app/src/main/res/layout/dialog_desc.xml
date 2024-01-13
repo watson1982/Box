@@ -13,12 +13,13 @@
         android:padding="@dimen/vs_20">
 
         <TextView
+            android:id="@+id/describe"
             android:layout_width="match_parent"
             android:layout_height="@dimen/vs_30"
             android:focusable="false"
             android:focusableInTouchMode="false"
             android:gravity="left"
-            android:text="其他数据源中的相关资源, 没有找到可以尝试选词重搜"
+            android:text="其他数据源"
             android:textColor="@color/color_000000_80"
             android:textSize="@dimen/ts_22" />
 
