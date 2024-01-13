@@ -1,21 +1,18 @@
 package com.github.tvbox.osc.ui.dialog;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import com.github.tvbox.osc.R;
-import org.jetbrains.annotations.NotNull;
-
-import android.content.DialogInterface;
-import android.view.View;
 import org.greenrobot.eventbus.EventBus;
+import org.jetbrains.annotations.NotNull;
 
 public class DescDialog extends BaseDialog {    
 
     public DescDialog(@NonNull @NotNull Context context) {
         super(context);       
         setContentView(R.layout.dialog_desc);
-       // init(context);
     }
     
     public void setDescribe(String describe) {
