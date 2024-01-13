@@ -47,35 +47,7 @@ public class DescDialog extends BaseDialog {
                 EventBus.getDefault().unregister(this);
             }
         });
-        mGridView = findViewById(R.id.mGridView);
-        searchAdapter = new QuickSearchAdapter();
-        mGridView.setHasFixedSize(true);
-        // lite
-        mGridView.setLayoutManager(new V7LinearLayoutManager(getContext(), 1, false));
-        // with preview
-        // mGridView.setLayoutManager(new V7GridLayoutManager(getContext(), 3));
-        mGridView.setAdapter(searchAdapter);
-        searchAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                Movie.Video video = searchAdapter.getData().get(position);
-                EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_QUICK_SEARCH_SELECT, video));
-                dismiss();
-            }
-        });
-        searchAdapter.setNewData(new ArrayList<>());
-        searchWordAdapter = new SearchWordAdapter();
-        mGridViewWord = findViewById(R.id.mGridViewWord);
-        mGridViewWord.setAdapter(searchWordAdapter);
-        mGridViewWord.setLayoutManager(new V7LinearLayoutManager(context, 0, false));
-        searchWordAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                searchAdapter.getData().clear();
-                searchAdapter.notifyDataSetChanged();
-                EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_QUICK_SEARCH_WORD_CHANGE, searchWordAdapter.getData().get(position)));
-            }
-        });
-        searchWordAdapter.setNewData(new ArrayList<>());
+        
+        
     }
 }
