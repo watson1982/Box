@@ -19,6 +19,13 @@ public class DescDialog extends BaseDialog {
         setContentView(R.layout.dialog_desc);
         init(context);
     }
+    
+    public void setDescribe(String describe) {
+    	TextView tvDescribe = findViewById(R.id.describe);
+        tvDescribe.setText(describe);
+        tvDescribe.requestFocus();
+        tvDescribe.requestFocusFromTouch();
+    }
 
     private void init(Context context) {
         EventBus.getDefault().register(this);
