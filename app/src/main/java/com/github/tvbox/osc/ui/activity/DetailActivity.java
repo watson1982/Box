@@ -338,7 +338,7 @@ public class DetailActivity extends BaseActivity {
                 FastClickCheckUtil.check(v);
                 DescDialog descdialog = new DescDialog(mContext);
                 //  descdialog.setTip("内容简介");
-                descdialog.setDescribe(removeHtmlTag(mVideo.des));
+                //descdialog.setDescribe(removeHtmlTag(mVideo.des));
                 descdialog.show();
             }
         });
