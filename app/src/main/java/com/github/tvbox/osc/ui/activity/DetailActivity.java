@@ -332,13 +332,6 @@ public class DetailActivity extends BaseActivity {
                 }
             }
         });
-        /*tvDesc.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DescDialog descDialog = new DescDialog(mContext);
-                descDialog.show();
-            }
-        });*/
         tvDesc.setOnClickListener(new View.OnClickListener() {@Override
             public void onClick(View v) {
             	runOnUiThread(new Runnable() {@Override
@@ -346,7 +339,7 @@ public class DetailActivity extends BaseActivity {
 		                FastClickCheckUtil.check(v);
 		                DescDialog dialog = new DescDialog(mContext);
 		                //  dialog.setTip("内容简介");
-		                //dialog.setDescribe(removeHtmlTag(mVideo.des));
+		                dialog.setDescribe(removeHtmlTag(mVideo.des));
 		                dialog.show();
 		            }
 		        });
