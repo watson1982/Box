@@ -41,5 +41,60 @@
       <option name="name" value="Gradle Central Plugin Repository" />
       <option name="url" value="https://plugins.gradle.org/m2" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven8" />
+      <option name="name" value="maven8" />
+      <option name="url" value="https://maven.aliyun.com/repository/grails-core" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven7" />
+      <option name="name" value="maven7" />
+      <option name="url" value="https://maven.aliyun.com/repository/spring-plugin" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven4" />
+      <option name="name" value="maven4" />
+      <option name="url" value="https://maven.aliyun.com/repository/spring" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven" />
+      <option name="name" value="maven" />
+      <option name="url" value="https://maven.aliyun.com/repository/central" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven2" />
+      <option name="name" value="maven2" />
+      <option name="url" value="https://maven.aliyun.com/repository/public" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven9" />
+      <option name="name" value="maven9" />
+      <option name="url" value="https://developer.huawei.com/repo/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven3" />
+      <option name="name" value="maven3" />
+      <option name="url" value="https://maven.aliyun.com/repository/google" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven13" />
+      <option name="name" value="maven13" />
+      <option name="url" value="https://maven.aliyun.com/repository/releases" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven10" />
+      <option name="name" value="maven10" />
+      <option name="url" value="https://chaquo.com/maven" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven5" />
+      <option name="name" value="maven5" />
+      <option name="url" value="https://maven.aliyun.com/repository/gradle-plugin" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven6" />
+      <option name="name" value="maven6" />
+      <option name="url" value="https://maven.aliyun.com/repository/apache-snapshots" />
+    </remote-repository>
   </component>
 </project>

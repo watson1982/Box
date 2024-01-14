@@ -8,6 +8,7 @@ import android.util.Base64;
 import com.github.catvod.crawler.JarLoader;
 import com.github.catvod.crawler.JsLoader;
 import com.github.catvod.crawler.Spider;
+import com.github.catvod.crawler.SpiderNull;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.base.App;
 import com.github.tvbox.osc.bean.IJKCode;
@@ -31,6 +32,7 @@ import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.AbsCallback;
 import com.lzy.okgo.model.Response;
 import com.orhanobut.hawk.Hawk;
+import com.undcover.freedom.pyramid.PythonLoader;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
@@ -64,6 +66,7 @@ public class ApiConfig {
     private List<IJKCode> ijkCodes;
     private String spider = null;
     public String wallpaper = "";
+    private PythonLoader pyLoader = PythonLoader.getInstance();
 
     private final SourceBean emptyHome = new SourceBean();
 
@@ -272,6 +275,8 @@ public class ApiConfig {
                     @Override
                     public void onSuccess(Response<File> response) {
                         if (response.body().exists()) {
+                            jsLoader.load();
+                            pyLoader.load();
                             if (jarLoader.load(response.body().getAbsolutePath())) {
                                 callback.success();
                             } else {
@@ -666,11 +671,38 @@ public class ApiConfig {
         if (sourceBean.getApi().endsWith(".js") || sourceBean.getApi().contains(".js?")) {
             return jsLoader.getSpider(sourceBean.getKey(), sourceBean.getApi(), sourceBean.getExt(), sourceBean.getJar());
         }
-
+        //pyramid-add-start
+        if (sourceBean.getApi().toLowerCase().endsWith(".py")) {
+            try {
+                return pyLoader.getSpider(sourceBean.getKey(), sourceBean.getApi(), sourceBean.getExt());
+            } catch (Exception e) {
+                e.printStackTrace();
+                return new SpiderNull();
+            }
+        }
+        //pyramid-add-end
         return jarLoader.getSpider(sourceBean.getKey(), sourceBean.getApi(), sourceBean.getExt(), sourceBean.getJar());
     }
 
     public Object[] proxyLocal(Map param) {
+        //pyramid-add-start
+        try {
+            String doStr = (String) param.get("do");
+            if (doStr.equals("js")) {
+                return jsLoader.proxyInvoke(param);
+            }
+            if(param.containsKey("api")){
+                if(doStr.equals("ck"))
+                    return pyLoader.proxyLocal("","",param);
+                SourceBean sourceBean = ApiConfig.get().getSource(doStr);
+                return pyLoader.proxyLocal(sourceBean.getKey(),sourceBean.getExt(),param);
+            }else{
+                if(doStr.equals("live")) return pyLoader.proxyLocal("","",param);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //pyramid-add-end
 
         return jarLoader.proxyInvoke(param);
     }

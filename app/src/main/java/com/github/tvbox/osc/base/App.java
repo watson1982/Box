@@ -16,6 +16,7 @@ import com.github.tvbox.osc.util.PlayerHelper;
 import com.kingja.loadsir.core.LoadSir;
 import com.orhanobut.hawk.Hawk;
 import com.p2p.P2PClass;
+import com.undcover.freedom.pyramid.PythonLoader;
 import com.whl.quickjs.android.QuickJSLoader;
 import java.io.File;
 import me.jessyan.autosize.AutoSizeConfig;
@@ -56,6 +57,9 @@ public class App extends MultiDexApplication {
                 .setSupportSP(false)
                 .setSupportSubunits(Subunits.MM);
         PlayerHelper.init();
+        //pyramid-add-start
+        PythonLoader.getInstance().setApplication(this);
+        //pyramid-add-end
 
         // Delete Cache
         /*File dir = getCacheDir();

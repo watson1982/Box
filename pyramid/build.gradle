@@ -1,0 +1,63 @@
+plugins {
+    id 'com.android.library'
+    id 'com.chaquo.python'
+}
+
+android {
+    compileSdk rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        consumerProguardFiles "consumer-rules.pro"
+        ndk {
+            abiFilters 'arm64-v8a'
+            //abiFilters "armeabi-v7a"
+        }
+        python {
+            buildPython "D:/Python3.8.5/python.exe"
+            pip {
+                install "pycryptodome"
+                install "requests"
+                install "lxml"
+                install "jsonpath"
+                install "ujson"
+                install "pyquery"
+                install "cachetools"
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        main {
+            // Android代码模块
+            setRoot "src/main"
+            // Python代码模块，也就是你的Python源码所在项目中的文件夹
+            python.srcDirs = ["src/python"]
+        }
+    }
+    sourceSets {
+        main {
+            // Android代码模块
+            setRoot "src/main"
+            // Python代码模块，也就是你的Python源码所在项目中的文件夹
+            python.srcDirs = ["src/python"]
+        }
+    }
+    namespace 'com.undcover.freedom.pyramid'
+}
+
+dependencies {
+
+}

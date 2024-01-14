@@ -1,8 +1,10 @@
 package com.github.tvbox.osc.server;
 
+import org.nanohttpd.protocols.http.IHTTPSession;
+import org.nanohttpd.protocols.http.response.Response;
+
 import java.util.Map;
 
-import fi.iki.elonen.NanoHTTPD;
 
 /**
  * @author pj567
@@ -21,7 +23,7 @@ public interface RequestProcess {
      * @param fileName
      * @return
      */
-    boolean isRequest(NanoHTTPD.IHTTPSession session, String fileName);
+    boolean isRequest(IHTTPSession session, String fileName);
 
     /**
      * doResponse
@@ -32,5 +34,5 @@ public interface RequestProcess {
      * @param files
      * @return
      */
-    NanoHTTPD.Response doResponse(NanoHTTPD.IHTTPSession session, String fileName, Map<String, String> params, Map<String, String> files);
+    Response doResponse(IHTTPSession session, String fileName, Map<String, String> params, Map<String, String> files);
 }

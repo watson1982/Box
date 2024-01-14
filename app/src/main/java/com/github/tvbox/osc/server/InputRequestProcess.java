@@ -2,7 +2,10 @@ package com.github.tvbox.osc.server;
 
 import java.util.Map;
 
-import fi.iki.elonen.NanoHTTPD;
+import org.nanohttpd.protocols.http.IHTTPSession;
+import org.nanohttpd.protocols.http.request.Method;
+import org.nanohttpd.protocols.http.response.Response;
+import org.nanohttpd.protocols.http.response.Status;
 
 /**
  * @author pj567
@@ -18,8 +21,8 @@ public class InputRequestProcess implements RequestProcess {
     }
 
     @Override
-    public boolean isRequest(NanoHTTPD.IHTTPSession session, String fileName) {
-        if (session.getMethod() == NanoHTTPD.Method.POST) {
+    public boolean isRequest(IHTTPSession session, String fileName) {
+        if (session.getMethod() == Method.POST) {
             switch (fileName) {
                 case "/action":
                     return true;
@@ -29,7 +32,7 @@ public class InputRequestProcess implements RequestProcess {
     }
 
     @Override
-    public NanoHTTPD.Response doResponse(NanoHTTPD.IHTTPSession session, String fileName, Map<String, String> params, Map<String, String> files) {
+    public Response doResponse(IHTTPSession session, String fileName, Map<String, String> params, Map<String, String> files) {
         DataReceiver mDataReceiver = remoteServer.getDataReceiver();
         switch (fileName) {
             case "/action":
@@ -61,13 +64,14 @@ public class InputRequestProcess implements RequestProcess {
                         case "mirror": {
                             //推送当前电影、电视剧……
                             mDataReceiver.onMirrorReceived(params.get("id").trim(), params.get("sourceKey").trim());
-                            return RemoteServer.createPlainTextResponse(NanoHTTPD.Response.Status.OK, "mirrored");
+                            return RemoteServer.createPlainTextResponse(Status.OK, "mirrored");
                         }
                     }
                 }
-                return RemoteServer.createPlainTextResponse(NanoHTTPD.Response.Status.OK, "ok");
+                return RemoteServer.createPlainTextResponse(Status.OK, "ok");
             default:
-                return RemoteServer.createPlainTextResponse(NanoHTTPD.Response.Status.NOT_FOUND, "Error 404, file not found.");
+                return RemoteServer.createPlainTextResponse(Status.NOT_FOUND, "Error 404, file not found.");
         }
     }
+
 }

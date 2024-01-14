@@ -17,6 +17,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import org.greenrobot.eventbus.EventBus;
+import org.nanohttpd.protocols.http.IHTTPSession;
+import org.nanohttpd.protocols.http.NanoHTTPD;
+import org.nanohttpd.protocols.http.request.Method;
+import org.nanohttpd.protocols.http.response.IStatus;
+import org.nanohttpd.protocols.http.response.Response;
+import org.nanohttpd.protocols.http.response.Status;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -43,7 +49,8 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import fi.iki.elonen.NanoHTTPD;
+import static org.nanohttpd.protocols.http.response.Response.newChunkedResponse;
+import static org.nanohttpd.protocols.http.response.Response.newFixedLengthResponse;
 
 /**
  * @author pj567
@@ -120,8 +127,8 @@ public class RemoteServer extends NanoHTTPD {
                         int code = (int) rs[0];
                         String mime = (String) rs[1];
                         InputStream stream = rs[2] != null ? (InputStream) rs[2] : null;
-                        Response response = NanoHTTPD.newChunkedResponse(
-                        NanoHTTPD.Response.Status.lookup(code),
+                        Response response = newChunkedResponse(
+                        Status.lookup(code),
                         mime,
                         stream);
                         if (rs.length > 3) {
@@ -144,15 +151,15 @@ public class RemoteServer extends NanoHTTPD {
                         File localFile = new File(file);
                         if (localFile.exists()) {
                             if (localFile.isFile()) {
-                                return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.OK, "application/octet-stream", new FileInputStream(localFile));
+                                return newChunkedResponse(Status.OK, "application/octet-stream", new FileInputStream(localFile));
                             } else {
-                                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, fileList(root, f));
+                                return newFixedLengthResponse(Status.OK, MIME_PLAINTEXT, fileList(root, f));
                             }
                         } else {
-                            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "File " + file + " not found!");
+                            return newFixedLengthResponse(Status.INTERNAL_ERROR, MIME_PLAINTEXT, "File " + file + " not found!");
                         }
                     } catch (Throwable th) {
-                        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, th.getMessage());
+                        return newFixedLengthResponse(Status.INTERNAL_ERROR, MIME_PLAINTEXT, th.getMessage());
                     }
                 } else if (fileName.equals("/dns-query")) {
                     String name = session.getParms().get("name");
@@ -162,16 +169,16 @@ public class RemoteServer extends NanoHTTPD {
                     } catch (Throwable th) {
                         rs = new byte[0];
                     }
-                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/dns-message", new ByteArrayInputStream(rs), rs.length);
+                    return newFixedLengthResponse(Status.OK, "application/dns-message", new ByteArrayInputStream(rs), rs.length);
                 } else if (fileName.equals("/m3u8")) {
-                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, m3u8Content);
+                    return newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_PLAINTEXT, m3u8Content);
                 } else if (fileName.startsWith("/dash/")) {
                     String dashData = App.getInstance().getDashData();
                     try {
                         String data = new String(Base64.decode(dashData, Base64.DEFAULT | Base64.NO_WRAP), "UTF-8");
-                        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/dash+xml", data);
+                        return newFixedLengthResponse(Status.OK, "application/dash+xml", data);
                     } catch (Throwable th) {
-                        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, dashData);
+                        return newFixedLengthResponse(Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, dashData);
                     }
                 }
             } else if (session.getMethod() == Method.POST) {
@@ -192,7 +199,7 @@ public class RemoteServer extends NanoHTTPD {
                     }
                     session.parseBody(files);
                 } catch (IOException IOExc) {
-                    return createPlainTextResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "SERVER INTERNAL ERROR: IOException: " + IOExc.getMessage());
+                    return createPlainTextResponse(Status.INTERNAL_ERROR, "SERVER INTERNAL ERROR: IOException: " + IOExc.getMessage());
                 } catch (NanoHTTPD.ResponseException rex) {
                     return createPlainTextResponse(rex.getStatus(), rex.getMessage());
                 }
@@ -223,7 +230,7 @@ public class RemoteServer extends NanoHTTPD {
                                 if (tmp.exists()) tmp.delete();
                             }
                         }
-                        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OK");
+                        return newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OK");
                     } else if (fileName.equals("/newFolder")) {
                         String path = params.get("path");
                         String name = params.get("name");
@@ -234,7 +241,7 @@ public class RemoteServer extends NanoHTTPD {
                             File flag = new File(root + "/" + path + "/" + name + "/.tvbox_folder");
                             if (!flag.exists()) flag.createNewFile();
                         }
-                        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OK");
+                        return newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OK");
                     } else if (fileName.equals("/delFolder")) {
                         String path = params.get("path");
                         String root = Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -242,7 +249,7 @@ public class RemoteServer extends NanoHTTPD {
                         if (file.exists()) {
                             FileUtils.recursiveDelete(file);
                         }
-                        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OK");
+                        return newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OK");
                     } else if (fileName.equals("/delFile")) {
                         String path = params.get("path");
                         String root = Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -250,10 +257,10 @@ public class RemoteServer extends NanoHTTPD {
                         if (file.exists()) {
                             file.delete();
                         }
-                        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OK");
+                        return newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OK");
                     }
                 } catch (Throwable th) {
-                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OK");
+                    return newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OK");
                 }
             }
         }
@@ -282,11 +289,11 @@ public class RemoteServer extends NanoHTTPD {
         return "http://127.0.0.1:" + RemoteServer.serverPort + "/";
     }
 
-    public static Response createPlainTextResponse(Response.IStatus status, String text) {
+    public static Response createPlainTextResponse(Status status, String text) {
         return newFixedLengthResponse(status, NanoHTTPD.MIME_PLAINTEXT, text);
     }
 
-    public static Response createJSONResponse(Response.IStatus status, String text) {
+    public static Response createJSONResponse(IStatus status, String text) {
         return newFixedLengthResponse(status, "application/json", text);
     }
 

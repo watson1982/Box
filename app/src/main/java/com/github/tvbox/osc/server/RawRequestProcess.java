@@ -2,11 +2,15 @@ package com.github.tvbox.osc.server;
 
 import android.content.Context;
 
+import org.nanohttpd.protocols.http.IHTTPSession;
+import org.nanohttpd.protocols.http.request.Method;
+import org.nanohttpd.protocols.http.response.Response;
+import org.nanohttpd.protocols.http.response.Status;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-import fi.iki.elonen.NanoHTTPD;
 
 /**
  * @author pj567
@@ -27,17 +31,17 @@ public class RawRequestProcess implements RequestProcess {
     }
 
     @Override
-    public boolean isRequest(NanoHTTPD.IHTTPSession session, String fileName) {
-        return session.getMethod() == NanoHTTPD.Method.GET && this.fileName.equalsIgnoreCase(fileName);
+    public boolean isRequest(IHTTPSession session, String fileName) {
+        return session.getMethod() == Method.GET && this.fileName.equalsIgnoreCase(fileName);
     }
 
     @Override
-    public NanoHTTPD.Response doResponse(NanoHTTPD.IHTTPSession session, String fileName, Map<String, String> params, Map<String, String> files) {
+    public Response doResponse(IHTTPSession session, String fileName, Map<String, String> params, Map<String, String> files) {
         InputStream inputStream = mContext.getResources().openRawResource(this.resourceId);
         try {
-            return RemoteServer.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, mimeType + "; charset=utf-8", inputStream, (long) inputStream.available());
+            return Response.newFixedLengthResponse(Status.OK, mimeType + "; charset=utf-8", inputStream, (long) inputStream.available());
         } catch (IOException IOExc) {
-            return RemoteServer.createPlainTextResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "SERVER INTERNAL ERROR: IOException: " + IOExc.getMessage());
+            return RemoteServer.createPlainTextResponse(Status.INTERNAL_ERROR, "SERVER INTERNAL ERROR: IOException: " + IOExc.getMessage());
         }
     }
 }
