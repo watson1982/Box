@@ -1,7 +1,5 @@
 package com.github.tvbox.osc.ui.adapter;
 
-
-import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,10 +36,9 @@ public class CheckboxSearchAdapter extends ListAdapter<SourceBean, CheckboxSearc
         mCheckedSources = checkedSources;
     }
 
-    private final ArrayList<SourceBean> data = new ArrayList<>();
+    private ArrayList<SourceBean> data = new ArrayList<>();
     public HashMap<String, String> mCheckedSources = new HashMap<>();
 
-    @SuppressLint("NotifyDataSetChanged")
     public void setData(List<SourceBean> newData, HashMap<String, String> checkedSources) {
         data.clear();
         data.addAll(newData);
@@ -58,9 +55,9 @@ public class CheckboxSearchAdapter extends ListAdapter<SourceBean, CheckboxSearc
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         int pos = holder.getAdapterPosition();
-        SourceBean sourceBean = data.get(pos);
-        holder.oneSearchSource.setText(sourceBean.getName());
+        SourceBean sourceBean = data.get(pos);        
         holder.oneSearchSource.setOnCheckedChangeListener(null);
+        holder.oneSearchSource.setText(sourceBean.getName());
         if (mCheckedSources != null) {
             holder.oneSearchSource.setChecked(mCheckedSources.containsKey(sourceBean.getKey()));
         }
@@ -73,18 +70,19 @@ public class CheckboxSearchAdapter extends ListAdapter<SourceBean, CheckboxSearc
                 } else {
                     mCheckedSources.remove(sourceBean.getKey());
                 }
+                SearchHelper.putCheckedSource(sourceBean.getKey(), isChecked);
                 notifyItemChanged(pos);
             }
         });
 
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         public CheckBox oneSearchSource;
 
         public ViewHolder(View view) {
             super(view);
-            oneSearchSource = view.findViewById(R.id.oneSearchSource);
+            oneSearchSource = (CheckBox) view.findViewById(R.id.oneSearchSource);
         }
     }
 
