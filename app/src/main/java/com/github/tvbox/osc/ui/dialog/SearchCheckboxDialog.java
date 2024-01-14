@@ -48,7 +48,7 @@ public class SearchCheckboxDialog extends BaseDialog {
 
     @Override
     public void dismiss() {
-        checkboxSearchAdapter.setMCheckedSources();
+        //checkboxSearchAdapter.setMCheckedSources();
         super.dismiss();
     }
 
