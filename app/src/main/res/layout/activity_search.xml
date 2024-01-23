@@ -125,7 +125,7 @@
 
     <LinearLayout
         android:id="@+id/llWord"
-        android:layout_width="@dimen/vs_240"
+        android:layout_width="@dimen/vs_260"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:paddingTop="@dimen/vs_20"
