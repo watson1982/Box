@@ -439,8 +439,7 @@ public class SearchActivity extends BaseActivity {
                                         .getAsJsonObject("reportData")
                                         .get("keyword_txt").getAsString();
                                 hots.add(keywordTxt.trim());
-                            }
-                            llLayout_history.setVisibility(View.GONE);
+                            }                            
                             tHotSearchText.setText("猜你想搜");
                             wordAdapter.setNewData(hots);
                             mGridViewWord.smoothScrollToPosition(0);
