@@ -43,9 +43,9 @@ public class SelectDialog<T> extends BaseDialog {
     }
     
     public void setAdapter(TvRecyclerView tvRecyclerView, SelectDialogAdapter.SelectDialogInterface<T> sourceBeanSelectDialogInterface, DiffUtil.ItemCallback<T> sourceBeanItemCallback, List<T> data, int select) {
-    	SelectDialogAdapter<T> adapter = new SelectDialogAdapter<>(sourceBeanSelectDialogInterface, sourceBeanItemCallback, muteCheck);
         if (select >= data.size() || select < 0) select = 0;//if source update, data item count maybe smaller than before
-        final int selectIdx = select;       
+        final int selectIdx = select;
+        SelectDialogAdapter<T> adapter = new SelectDialogAdapter<>(sourceBeanSelectDialogInterface, sourceBeanItemCallback, muteCheck);
         adapter.setData(data, select);
         if(tvRecyclerView == null){
             tvRecyclerView = findViewById(R.id.list);
