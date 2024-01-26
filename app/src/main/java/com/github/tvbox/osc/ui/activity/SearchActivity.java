@@ -4,8 +4,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -13,6 +17,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +34,8 @@ import com.github.tvbox.osc.base.BaseActivity;
 import com.github.tvbox.osc.bean.AbsXml;
 import com.github.tvbox.osc.bean.Movie;
 import com.github.tvbox.osc.bean.SourceBean;
+import com.github.tvbox.osc.cache.SearchHistory;
+import com.github.tvbox.osc.data.SearchPresenter;
 import com.github.tvbox.osc.event.InputMsgEvent;
 import com.github.tvbox.osc.event.RefreshEvent;
 import com.github.tvbox.osc.event.ServerEvent;
@@ -40,6 +47,7 @@ import com.github.tvbox.osc.ui.dialog.RemoteDialog;
 import com.github.tvbox.osc.ui.dialog.SearchCheckboxDialog;
 import com.github.tvbox.osc.ui.dialog.SelectDialog;
 import com.github.tvbox.osc.ui.tv.QRCodeGen;
+import com.github.tvbox.osc.ui.tv.widget.CustomEditText;
 import com.github.tvbox.osc.ui.tv.widget.SearchKeyboard;
 import com.github.tvbox.osc.util.FastClickCheckUtil;
 import com.github.tvbox.osc.util.HawkConfig;
@@ -51,6 +59,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.jieba_android.JiebaSegmenter;
+import com.jieba_android.RequestCallback;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.AbsCallback;
 import com.lzy.okgo.model.Response;
@@ -66,11 +76,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import com.yang.flowlayoutlibrary.FlowLayout;
 
 import me.jessyan.autosize.utils.AutoSizeUtils;
+
 /**
  * @author pj567
  * @date :2020/12/23
@@ -80,8 +93,8 @@ public class SearchActivity extends BaseActivity {
     private LinearLayout llLayout;
     private TvRecyclerView mGridView;
     private TvRecyclerView mGridViewWord;
-    SourceViewModel sourceViewModel;
-    private EditText etSearch;
+    private SourceViewModel sourceViewModel;
+    private CustomEditText etSearch;    
     private TextView tvSearch;
     private TextView tvClear;
     private SearchKeyboard keyboard;
@@ -91,8 +104,21 @@ public class SearchActivity extends BaseActivity {
     private PinyinAdapter wordAdapter;
     private String searchTitle = "";
     private ImageView tvSearchCheckbox;
-    private TextView filterBtn;    
+    private TextView filterBtn;
+    
+    private RelativeLayout searchTips;
+    private FlowLayout tv_history;
+    private LinearLayout llWord;   
+
+    private ImageView clearHistory;
+    private SearchPresenter searchPresenter;
+
+    private List<String> fenci;
     private String sKey;
+    public String keyword;
+    
+    private TextView tHotSearchText;
+    private static ArrayList<String> hots = new ArrayList<>();
     private HashMap<String, String> mCheckSources = null;
     private SearchCheckboxDialog mSearchCheckboxDialog = null;
 
@@ -105,7 +131,7 @@ public class SearchActivity extends BaseActivity {
 
     @Override
     protected void init() {
-        disableKeyboard(SearchActivity.this);
+    	disableKeyboard(SearchActivity.this);
         initView();
         initViewModel();
         initData();
@@ -132,10 +158,17 @@ public class SearchActivity extends BaseActivity {
     public void openSystemKeyBoard() {
         InputMethodManager imm = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(this.getCurrentFocus(), InputMethodManager.SHOW_FORCED);
+    }    
+    
+    public void hideSystemKeyBoard() {
+        InputMethodManager imm = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if(imm.isActive()){
+            imm.hideSoftInputFromWindow(etSearch.getApplicationWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
+        }
     }
 
     private List<Runnable> pauseRunnable = null;
-
+    
     @Override
     protected void onResume() {
         super.onResume();
@@ -150,15 +183,20 @@ public class SearchActivity extends BaseActivity {
             pauseRunnable.clear();
             pauseRunnable = null;
         }
-    }    
+    }
 
-    private void initView() {
+    private void initView() {    	
         EventBus.getDefault().register(this);
         llLayout = findViewById(R.id.llLayout);
+        llWord = findViewById(R.id.llWord);
         etSearch = findViewById(R.id.etSearch);
-        filterBtn = findViewById(R.id.filterBtn);
         tvSearch = findViewById(R.id.tvSearch);
         tvSearchCheckbox = findViewById(R.id.tvSearchCheckbox);
+        filterBtn = findViewById(R.id.filterBtn);
+        tHotSearchText = findViewById(R.id.mHotSearch_text);
+        searchTips = findViewById(R.id.search_tips);
+        tv_history = findViewById(R.id.tv_history);
+        clearHistory = findViewById(R.id.clear_history);
         tvClear = findViewById(R.id.tvClear);
         tvAddress = findViewById(R.id.tvAddress);
         ivQRCode = findViewById(R.id.ivQRCode);
@@ -173,12 +211,17 @@ public class SearchActivity extends BaseActivity {
         wordAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+            	keyword = wordAdapter.getItem(position);
+                String[] split = keyword.split("\uFEFF");
+                keyword = split[split.length - 1];          
+                etSearch.setText(keyword);
                 if(Hawk.get(HawkConfig.FAST_SEARCH_MODE, false)){
                     Bundle bundle = new Bundle();
-                    bundle.putString("title", wordAdapter.getItem(position));
+                    bundle.putString("title", keyword);
+                    refreshSearchHistory(keyword);
                     jumpActivity(FastSearchActivity.class, bundle);
-                }else {
-                    search(wordAdapter.getItem(position));
+                }else {                    
+                    search(keyword);
                 }
             }
         });
@@ -188,7 +231,7 @@ public class SearchActivity extends BaseActivity {
             mGridView.setLayoutManager(new V7LinearLayoutManager(this.mContext, 1, false));
             // with preview
         else
-            mGridView.setLayoutManager(new V7GridLayoutManager(this.mContext, 3));
+            mGridView.setLayoutManager(new V7GridLayoutManager(this.mContext, 4));
         searchAdapter = new SearchAdapter();
         mGridView.setAdapter(searchAdapter);
         searchAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
@@ -198,8 +241,8 @@ public class SearchActivity extends BaseActivity {
                 Movie.Video video = searchAdapter.getData().get(position);
                 if (video != null) {
                     try {
-                        if (sourceViewModel != null) {
-                            pauseRunnable = sourceViewModel.shutdownNow();                           
+                    	if (sourceViewModel != null) {
+                            pauseRunnable = sourceViewModel.shutdownNow();
                             JsLoader.stopAll();
                             sourceViewModel.destroyExecutor();
                         }
@@ -217,14 +260,14 @@ public class SearchActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
-                String wd = etSearch.getText().toString().trim();
-                if (!TextUtils.isEmpty(wd)) {
+                if (!TextUtils.isEmpty(keyword)) {
                     if(Hawk.get(HawkConfig.FAST_SEARCH_MODE, false)){
                         Bundle bundle = new Bundle();
-                        bundle.putString("title", wd);
+                        bundle.putString("title", keyword);
+                        refreshSearchHistory(keyword);
                         jumpActivity(FastSearchActivity.class, bundle);
-                    }else {
-                        search(wd);
+                    } else {
+                        search(keyword);
                     }
                 } else {
                     Toast.makeText(mContext, getString(R.string.search_input), Toast.LENGTH_SHORT).show();
@@ -236,9 +279,41 @@ public class SearchActivity extends BaseActivity {
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
                 etSearch.setText("");
+                wordAdapter.setNewData(hots);
+                mGridViewWord.smoothScrollToPosition(0);
+                tHotSearchText.setText("热门搜索");
+                cancel();                
             }
         });
         
+        this.etSearch.addTextChangedListener(new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            public void afterTextChanged(Editable s) {
+                keyword = s.toString().trim();
+                if (TextUtils.isEmpty(keyword)) {
+                	//wordAdapter.setNewData(hots);
+                    cancel();
+                    tv_history.setVisibility(View.VISIBLE);
+                    searchTips.setVisibility(View.VISIBLE);
+                    llWord.setVisibility(View.VISIBLE);
+                    mGridView.setVisibility(View.GONE);
+                }
+            }
+        });
+        etSearch.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if(keyCode == KeyEvent.KEYCODE_ENTER){
+                    hideSystemKeyBoard();
+                }
+                return false;
+            }
+        });
         etSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -247,6 +322,11 @@ public class SearchActivity extends BaseActivity {
                 openSystemKeyBoard();//再次尝试拉起键盘
                 SearchActivity.this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
             }
+        });
+        
+        clearHistory.setOnClickListener(v -> {
+            searchPresenter.clearSearchHistory();
+            initSearchHistory();
         });
         
         keyboard.setOnSearchKeyListener(new SearchKeyboard.OnSearchKeyListener() {
@@ -268,13 +348,17 @@ public class SearchActivity extends BaseActivity {
                     if (text.length() > 0) {
                         loadRec(text);
                     }
+                    if (text.length() == 0) {
+                        wordAdapter.setNewData(hots);
+                        mGridViewWord.smoothScrollToPosition(0);
+                        tHotSearchText.setText("热门搜索");
+                    }
                 } else if (pos == 0) {
                     RemoteDialog remoteDialog = new RemoteDialog(mContext);
                     remoteDialog.show();
                 }
             }
         });
-        
         setLoadSir(llLayout);
         this.sKey = (String) SettingsUtil.hkGet(HawkConfig.SEARCH_FILTER_KEY, "");
         String string;
@@ -286,6 +370,7 @@ public class SearchActivity extends BaseActivity {
             SourceBean sourceBean = ApiConfig.get().getSource(this.sKey);
             string = sourceBean != null ? sourceBean.getName() : "全局搜索";
         }
+        filterBtn.setSelected(true);//能动起来的关键代码
         filterBtn.setText(string);
         filterBtn.setOnClickListener(new View.OnClickListener() {
 
@@ -391,17 +476,48 @@ public class SearchActivity extends BaseActivity {
                 });
                 mSearchCheckboxDialog.show();
             }
-        });        
+        });
+    }
+    
+    private void refreshSearchHistory(String keyword2) {
+        if (!this.searchPresenter.keywordsExist(keyword2)) {
+            this.searchPresenter.addKeyWordsTodb(keyword2);
+            initSearchHistory();
+        }
+    }
+
+    private void initSearchHistory() {
+        ArrayList<SearchHistory> searchHistory = this.searchPresenter.getSearchHistory();
+        List<String> historyList = new ArrayList<>();
+        for (SearchHistory history : searchHistory) {
+            historyList.add(history.searchKeyWords);
+        }
+        Collections.reverse(historyList);
+        tv_history.setViews(historyList, new FlowLayout.OnItemClickListener() {
+            public void onItemClick(String content) {
+            	etSearch.setText(content);
+            	if(Hawk.get(HawkConfig.FAST_SEARCH_MODE, false)){                      	
+                    Bundle bundle = new Bundle();
+                    bundle.putString("title", content);
+                    refreshSearchHistory(content);
+                    jumpActivity(FastSearchActivity.class, bundle);
+                } else {
+                	search(content);                
+                //etSearch.setSelection(etSearch.getText().length());
+                }
+            }
+        });
     }
 
     private void initViewModel() {
         sourceViewModel = new ViewModelProvider(this).get(SourceViewModel.class);
+        searchPresenter = new SearchPresenter();
     }
 
     /**
      * 拼音联想
      */
-    private void loadRec(String key) {
+     private void loadRec(String key) {
         OkGo.get("https://tv.aiseet.atianqi.com/i-tvbin/qtv_video/search/get_search_smart_box")
                 .params("format", "json")
                 .params("page_num", 0)
@@ -427,8 +543,10 @@ public class SearchActivity extends BaseActivity {
                                         .getAsJsonObject("reportData")
                                         .get("keyword_txt").getAsString();
                                 hots.add(keywordTxt.trim());
-                            }
+                            }                            
+                            tHotSearchText.setText("猜你想搜");
                             wordAdapter.setNewData(hots);
+                            mGridViewWord.smoothScrollToPosition(0);
                         } catch (Throwable th) {
                             th.printStackTrace();
                         }
@@ -442,8 +560,11 @@ public class SearchActivity extends BaseActivity {
     }
 
     private void initData() {
+    	showSuccess();
+        mGridView.setVisibility(View.GONE);
         refreshQRCode();
         initCheckedSourcesForSearch();
+        initSearchHistory();
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("title")) {
             String title = intent.getStringExtra("title");
@@ -451,17 +572,17 @@ public class SearchActivity extends BaseActivity {
             if(Hawk.get(HawkConfig.FAST_SEARCH_MODE, false)){
                 Bundle bundle = new Bundle();
                 bundle.putString("title", title);
+                refreshSearchHistory(title);
                 jumpActivity(FastSearchActivity.class, bundle);
             }else {
                 search(title);
             }
         }
         // 加载热词
-        loadHotSearch();
-    }
-
-    //load hot search
-    private void loadHotSearch() {
+        if (hots.size() != 0) {
+            wordAdapter.setNewData(hots);
+            return;
+        }
         OkGo.<String>get("https://node.video.qq.com/x/api/hot_search")
                 .params("channdlId", "0")
                 .params("_", System.currentTimeMillis())
@@ -469,23 +590,22 @@ public class SearchActivity extends BaseActivity {
                     @Override
                     public void onSuccess(Response<String> response) {
                         try {
-                            ArrayList<String> hots = new ArrayList<>();
                             JsonObject mapResult = JsonParser.parseString(response.body())
                                     .getAsJsonObject()
                                     .get("data").getAsJsonObject()
                                     .get("mapResult").getAsJsonObject();
-                            List<String> groupIndex = Arrays.asList("0", "1", "2", "3", "5");
-                            for (String index : groupIndex) {
-                                JsonArray itemList = mapResult.get(index).getAsJsonObject()
-                                        .get("listInfo").getAsJsonArray();
-                                for (JsonElement ele : itemList) {
-                                    JsonObject obj = (JsonObject) ele;
-                                    String hotKey = obj.get("title").getAsString().trim().replaceAll("<|>|《|》|-", "").split(" ")[0];
-                                    if (!hots.contains(hotKey))
-                                        hots.add(hotKey);
-                                }
+                            List<String> emoji;
+                            if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.N)
+                                emoji = Arrays.asList(" ❶ "," ❷ "," ❸ "," ❹ "," ❺ "," ❻ "," ❼ "," ❽ "," ❾ "," ❿ "," ⑪ "," ⑫ "," ⑬ "," ⑭ "," ⑮ "," ⑯ "," ⑰ "," ⑱ "," ⑲ "," ⑳ ");
+                             else
+                                emoji = Arrays.asList("\uD83E\uDD47","\uD83E\uDD48","\uD83E\uDD49","4\uFE0F⃣","5\uFE0F⃣","6\uFE0F⃣","7\uFE0F⃣","8\uFE0F⃣","9\uFE0F⃣","\uD83D\uDD1F"," ⑪ "," ⑫ "," ⑬ "," ⑭ "," ⑮ "," ⑯ "," ⑰ "," ⑱ "," ⑲ "," ⑳ ");
+                            JsonArray itemList = mapResult.get("0").getAsJsonObject()
+                                    .get("listInfo").getAsJsonArray();
+                            for (int i = 0; i < 10; i++){
+                                JsonObject obj = itemList.get(i).getAsJsonObject();
+                                String hotKey = obj.get("title").getAsString().trim().replaceAll("<|>|《|》|-", "").split(" ")[0];
+                                hots.add(emoji.get(i) + "\uFEFF" + hotKey);
                             }
-
                             wordAdapter.setNewData(hots);
                         } catch (Throwable th) {
                             th.printStackTrace();
@@ -513,6 +633,7 @@ public class SearchActivity extends BaseActivity {
             if(Hawk.get(HawkConfig.FAST_SEARCH_MODE, false)){
                 Bundle bundle = new Bundle();
                 bundle.putString("title", title);
+                refreshSearchHistory(title);
                 jumpActivity(FastSearchActivity.class, bundle);
             }else{
                 search(title);
@@ -534,19 +655,33 @@ public class SearchActivity extends BaseActivity {
     private void initCheckedSourcesForSearch() {
         mCheckSources = SearchHelper.getSourcesForSearch();
     }
-
+   
     private void search(String title) {
         cancel();
-        showLoading();
-        etSearch.setText(title);
+        showLoading();        
         this.searchTitle = title;
-        mGridView.setVisibility(View.INVISIBLE);
+        mGridView.setVisibility(View.GONE);
         searchAdapter.setNewData(new ArrayList<>());
-        searchResult();
-    }
-    
-    private AtomicInteger allRunCount = new AtomicInteger(0);
+        refreshSearchHistory(title);
+        // 分词
+        JiebaSegmenter.getJiebaSegmenterSingleton().getDividedStringAsync(searchTitle, new RequestCallback<ArrayList<String>>() {
+            @Override
+            public void onSuccess(ArrayList<String> result) {
+                fenci = result;
+                searchResult();
+            }
 
+            @Override
+            public void onError(String errorMsg) {
+
+            }
+        });
+        //fenci = JiebaSegmenter.getJiebaSegmenterSingleton().getDividedString(searchTitle);
+        //searchResult();
+    }
+
+    private AtomicInteger allRunCount = new AtomicInteger(0);
+    
     private void searchResult() {
         try {
             sourceViewModel.initExecutor();
@@ -556,9 +691,9 @@ public class SearchActivity extends BaseActivity {
             searchAdapter.setNewData(new ArrayList<>());
             allRunCount.set(0);
         }
-        
+
         List<SourceBean> searchRequestList = new ArrayList<>();
-        
+
         boolean equals = this.sKey.equals("filter__home");
         if (equals) {
             SourceBean home = ApiConfig.get().getHomeSourceBean();
@@ -576,7 +711,7 @@ public class SearchActivity extends BaseActivity {
         } else {
             searchRequestList.add(ApiConfig.get().getSource(sKey));
         }
-        
+
         ArrayList<String> siteKey = new ArrayList<>();
         for (SourceBean bean : searchRequestList) {
             if (!bean.isSearchable()) {
@@ -589,10 +724,11 @@ public class SearchActivity extends BaseActivity {
             allRunCount.incrementAndGet();
         }
         if (siteKey.size() <= 0) {
-            Toast.makeText(mContext, getString(R.string.search_site), Toast.LENGTH_SHORT).show();
-            showEmpty();
+            Toast.makeText(mContext, "没有指定搜索源", Toast.LENGTH_SHORT).show();
+            //showEmpty();
             return;
         }
+
         for (String key : siteKey) {
             sourceViewModel.execute(new Runnable() {
                 @Override
@@ -607,14 +743,19 @@ public class SearchActivity extends BaseActivity {
         if (absXml != null && absXml.movie != null && absXml.movie.videoList != null && absXml.movie.videoList.size() > 0) {
             List<Movie.Video> data = new ArrayList<>();
             for (Movie.Video video : absXml.movie.videoList) {
-                data.add(video);
+            	if (SearchHelper.searchContains(video.name, fenci)) {
+                    data.add(video);
+                }    
             }
             if (searchAdapter.getData().size() > 0) {
                 searchAdapter.addData(data);
             } else {
                 showSuccess();
-                mGridView.setVisibility(View.VISIBLE);
                 searchAdapter.setNewData(data);
+                tv_history.setVisibility(View.GONE);
+                searchTips.setVisibility(View.GONE);
+                llWord.setVisibility(View.GONE);
+                mGridView.setVisibility(View.VISIBLE);
             }
         }
 
@@ -630,7 +771,7 @@ public class SearchActivity extends BaseActivity {
     private void cancel() {
         OkGo.getInstance().cancelTag("search");
     }
-
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
