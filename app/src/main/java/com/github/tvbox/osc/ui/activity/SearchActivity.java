@@ -59,8 +59,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.jieba_android.JiebaSegmenter;
-import com.jieba_android.RequestCallback;
+
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.AbsCallback;
 import com.lzy.okgo.model.Response;
@@ -113,7 +112,6 @@ public class SearchActivity extends BaseActivity {
     private ImageView clearHistory;
     private SearchPresenter searchPresenter;
 
-    private List<String> fenci;
     private String sKey;
     public String keyword;
     
@@ -663,21 +661,7 @@ public class SearchActivity extends BaseActivity {
         mGridView.setVisibility(View.GONE);
         searchAdapter.setNewData(new ArrayList<>());
         refreshSearchHistory(title);
-        // 分词
-        JiebaSegmenter.getJiebaSegmenterSingleton().getDividedStringAsync(searchTitle, new RequestCallback<ArrayList<String>>() {
-            @Override
-            public void onSuccess(ArrayList<String> result) {
-                fenci = result;
-                searchResult();
-            }
-
-            @Override
-            public void onError(String errorMsg) {
-
-            }
-        });
-        //fenci = JiebaSegmenter.getJiebaSegmenterSingleton().getDividedString(searchTitle);
-        //searchResult();
+        searchResult();
     }
 
     private AtomicInteger allRunCount = new AtomicInteger(0);
@@ -743,9 +727,7 @@ public class SearchActivity extends BaseActivity {
         if (absXml != null && absXml.movie != null && absXml.movie.videoList != null && absXml.movie.videoList.size() > 0) {
             List<Movie.Video> data = new ArrayList<>();
             for (Movie.Video video : absXml.movie.videoList) {
-            	if (SearchHelper.searchContains(video.name, fenci)) {
-                    data.add(video);
-                }    
+                data.add(video);
             }
             if (searchAdapter.getData().size() > 0) {
                 searchAdapter.addData(data);
