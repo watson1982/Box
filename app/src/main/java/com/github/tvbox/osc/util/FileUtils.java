@@ -278,6 +278,15 @@ public class FileUtils {
     }
     
     private static final Pattern URLJOIN = Pattern.compile("^http.*\\.(js|txt|json|m3u)$", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+    
+    public static String getRootPath() {
+        return Environment.getExternalStorageDirectory()
+            .getAbsolutePath();
+    }
+
+    public static File getLocal(String path) {
+        return new File(path.replace("file:/", getRootPath()));
+    }
 
     public static File getCacheDir() {
         return App.getInstance().getCacheDir();
