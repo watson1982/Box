@@ -8,12 +8,14 @@ import com.chad.library.adapter.base.BaseViewHolder;
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.bean.Movie;
-import com.github.tvbox.osc.util.DefaultConfig;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.github.tvbox.osc.util.ImgUtil;
+import com.github.tvbox.osc.util.MD5;
 import com.orhanobut.hawk.Hawk;
 
 import java.util.ArrayList;
+
+import me.jessyan.autosize.utils.AutoSizeUtils;
 
 public class SearchAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHolder> {
     public SearchAdapter() {
@@ -34,8 +36,7 @@ public class SearchAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHolder>
             }
             ImageView ivThumb = helper.getView(R.id.ivThumb);
             if (!TextUtils.isEmpty(item.pic)) {
-                // takagen99 : Use Glide instead
-                ImgUtil.load(item.pic, ivThumb, 14);
+                ImgUtil.load(item.pic, ivThumb, 10);
             } else {
                 ivThumb.setImageResource(R.drawable.img_loading_placeholder);
             }
