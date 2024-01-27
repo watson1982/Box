@@ -37,6 +37,7 @@
 
     <color name="transparent">#00000000</color>
     <color name="color_FF000000">#FF000000</color>
+    <color name="color_CC000000">#CC000000</color>
     <color name="color_000000_90">#E6000000</color>
     <color name="color_000000_80">#CC000000</color>
     <color name="color_000000_70">#B3000000</color>
