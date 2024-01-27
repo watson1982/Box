@@ -35,7 +35,7 @@ public class CheckboxSearchAdapter extends ListAdapter<SourceBean, CheckboxSearc
     private void setCheckedSource(HashMap<String, String> checkedSources) {
         mCheckedSources = checkedSources;
     }
-
+    
     private ArrayList<SourceBean> data = new ArrayList<>();
     public HashMap<String, String> mCheckedSources = new HashMap<>();
 
@@ -45,7 +45,7 @@ public class CheckboxSearchAdapter extends ListAdapter<SourceBean, CheckboxSearc
         setCheckedSource(checkedSources);
         notifyDataSetChanged();
         SearchHelper.putCheckedSources(checkedSources);
-    }
+    }   
 
     @Override
     public int getItemCount() {
@@ -55,9 +55,9 @@ public class CheckboxSearchAdapter extends ListAdapter<SourceBean, CheckboxSearc
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         int pos = holder.getAdapterPosition();
-        SourceBean sourceBean = data.get(pos);        
+        SourceBean sourceBean = data.get(pos);
         holder.oneSearchSource.setOnCheckedChangeListener(null);
-        holder.oneSearchSource.setText(sourceBean.getName());
+        holder.oneSearchSource.setText(sourceBean.getName());        
         if (mCheckedSources != null) {
             holder.oneSearchSource.setChecked(mCheckedSources.containsKey(sourceBean.getKey()));
         }
@@ -74,7 +74,6 @@ public class CheckboxSearchAdapter extends ListAdapter<SourceBean, CheckboxSearc
                 notifyItemChanged(pos);
             }
         });
-
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -82,8 +81,7 @@ public class CheckboxSearchAdapter extends ListAdapter<SourceBean, CheckboxSearc
 
         public ViewHolder(View view) {
             super(view);
-            oneSearchSource = (CheckBox) view.findViewById(R.id.oneSearchSource);
+            oneSearchSource = (CheckBox) view.findViewById(R.id.oneSearchSource);            
         }
     }
-
 }
