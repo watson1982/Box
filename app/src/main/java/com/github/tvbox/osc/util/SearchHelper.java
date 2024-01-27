@@ -13,26 +13,8 @@ import java.util.regex.Pattern;
 public class SearchHelper {
     private static final Pattern p = Pattern.compile("\\D+|(?:19|20)\\d{2}", Pattern.MULTILINE);
 
-    public static boolean searchContains(String data, List < String > keys) {
-        boolean search_ok = true;
-        for (int i = 0; i < keys.size(); i++) {
-            LOG.e("FenCi", keys.get(i)
-                .toLowerCase());
-            if (!data.toLowerCase()
-                .contains(keys.get(i)
-                .toLowerCase())) {
-                search_ok = false;
-                break;
-            }
-        }
-
-        return search_ok;
-    }
-
     public static HashMap < String, String > getSourcesForSearch() {
-        String api = Hawk.get(HawkConfig.API_URL, HomeActivity.getRes()
-            .getString(R.string.app_source));
-        //String api = Hawk.get(HawkConfig.API_URL, "");
+        String api = Hawk.get(HawkConfig.API_URL, HomeActivity.getRes().getString(R.string.app_source));
         if (api.isEmpty()) {
             return null;
         }
@@ -47,8 +29,7 @@ public class SearchHelper {
             if (mCheckSources == null) {
                 mCheckSources = new HashMap < > ();
             }
-            for (SourceBean bean: ApiConfig.get()
-                .getSourceBeanList()) {
+            for (SourceBean bean: ApiConfig.get().getSourceBeanList()) {
                 if (!bean.isSearchable()) {
                     continue;
                 }
@@ -59,9 +40,7 @@ public class SearchHelper {
     }
 
     public static void putCheckedSources(HashMap < String, String > mCheckSources) {
-        String api = Hawk.get(HawkConfig.API_URL, HomeActivity.getRes()
-            .getString(R.string.app_source));
-        //String api = Hawk.get(HawkConfig.API_URL, "");
+        String api = Hawk.get(HawkConfig.API_URL, HomeActivity.getRes().getString(R.string.app_source));
         if (api.isEmpty()) {
             return;
         }
@@ -74,8 +53,7 @@ public class SearchHelper {
     }
 
     public static void putCheckedSource(String siteKey, boolean checked) {
-        String api = Hawk.get(HawkConfig.API_URL, HomeActivity.getRes()
-            .getString(R.string.app_source));
+        String api = Hawk.get(HawkConfig.API_URL, HomeActivity.getRes().getString(R.string.app_source));
         if (api.isEmpty()) {
             return;
         }
@@ -87,13 +65,10 @@ public class SearchHelper {
             mCheckSourcesForApi.put(api, new HashMap < > ());
         }
         if (checked) {
-            mCheckSourcesForApi.get(api)
-                .put(siteKey, "1");
+            mCheckSourcesForApi.get(api).put(siteKey, "1");
         } else {
-            if (mCheckSourcesForApi.get(api)
-                .containsKey(siteKey)) {
-                mCheckSourcesForApi.get(api)
-                    .remove(siteKey);
+            if (mCheckSourcesForApi.get(api).containsKey(siteKey)) {
+                mCheckSourcesForApi.get(api).remove(siteKey);
             }
         }
         Hawk.put(HawkConfig.SOURCES_FOR_SEARCH, mCheckSourcesForApi);
