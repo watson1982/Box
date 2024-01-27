@@ -10,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.DiffUtil;
 
 import com.github.tvbox.osc.R;
@@ -226,7 +227,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
 
                     TvRecyclerView tvRecyclerView = dialog.findViewById(R.id.list);
                     tvRecyclerView.setLayoutManager(new V7GridLayoutManager(dialog.getContext(), spanCount));
-                    LinearLayout cl_root = dialog.findViewById(R.id.cl_root);
+                    ConstraintLayout cl_root = dialog.findViewById(R.id.cl_root);
                     ViewGroup.LayoutParams clp = cl_root.getLayoutParams();
                     if (spanCount != 1) {
                         clp.width = AutoSizeUtils.mm2px(dialog.getContext(), 400 + 260 * (spanCount - 1));
