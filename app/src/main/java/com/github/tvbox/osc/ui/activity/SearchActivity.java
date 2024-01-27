@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
@@ -59,8 +60,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.jieba_android.JiebaSegmenter;
-import com.jieba_android.RequestCallback;
+
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.AbsCallback;
 import com.lzy.okgo.model.Response;
@@ -112,8 +112,7 @@ public class SearchActivity extends BaseActivity {
 
     private ImageView clearHistory;
     private SearchPresenter searchPresenter;
-
-    private List<String> fenci;
+    
     private String sKey;
     public String keyword;
     
@@ -296,7 +295,6 @@ public class SearchActivity extends BaseActivity {
             public void afterTextChanged(Editable s) {
                 keyword = s.toString().trim();
                 if (TextUtils.isEmpty(keyword)) {
-                	//wordAdapter.setNewData(hots);
                     cancel();
                     tv_history.setVisibility(View.VISIBLE);
                     searchTips.setVisibility(View.VISIBLE);
@@ -663,21 +661,7 @@ public class SearchActivity extends BaseActivity {
         mGridView.setVisibility(View.GONE);
         searchAdapter.setNewData(new ArrayList<>());
         refreshSearchHistory(title);
-        // 分词
-        JiebaSegmenter.getJiebaSegmenterSingleton().getDividedStringAsync(searchTitle, new RequestCallback<ArrayList<String>>() {
-            @Override
-            public void onSuccess(ArrayList<String> result) {
-                fenci = result;
-                searchResult();
-            }
-
-            @Override
-            public void onError(String errorMsg) {
-
-            }
-        });
-        //fenci = JiebaSegmenter.getJiebaSegmenterSingleton().getDividedString(searchTitle);
-        //searchResult();
+        searchResult();
     }
 
     private AtomicInteger allRunCount = new AtomicInteger(0);
@@ -724,7 +708,7 @@ public class SearchActivity extends BaseActivity {
             allRunCount.incrementAndGet();
         }
         if (siteKey.size() <= 0) {
-            Toast.makeText(mContext, "没有指定搜索源", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, getString(R.string.search_site), Toast.LENGTH_SHORT).show();
             //showEmpty();
             return;
         }
@@ -743,9 +727,7 @@ public class SearchActivity extends BaseActivity {
         if (absXml != null && absXml.movie != null && absXml.movie.videoList != null && absXml.movie.videoList.size() > 0) {
             List<Movie.Video> data = new ArrayList<>();
             for (Movie.Video video : absXml.movie.videoList) {
-            	if (SearchHelper.searchContains(video.name, fenci)) {
-                    data.add(video);
-                }    
+            	data.add(video);    
             }
             if (searchAdapter.getData().size() > 0) {
                 searchAdapter.addData(data);
