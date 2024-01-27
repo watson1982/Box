@@ -19,7 +19,7 @@ import com.github.tvbox.osc.bean.Movie;
 import com.github.tvbox.osc.bean.MovieSort;
 import com.github.tvbox.osc.bean.SourceBean;
 import com.github.tvbox.osc.event.RefreshEvent;
-import com.github.tvbox.osc.player.thirdparty.RemoteTVBox;
+
 import com.github.tvbox.osc.util.DefaultConfig;
 import com.github.tvbox.osc.util.FileUtils;
 import com.github.tvbox.osc.util.HawkConfig;
@@ -267,36 +267,7 @@ public class SourceViewModel extends ViewModel {
                                 sortResult.postValue(null);
                             }
                         });
-            }else {
-                try {
-                    Map<String, String> params = new HashMap<>();
-                    params.put("filter","true");
-                    params.put("extend",extend);
-                    RemoteTVBox.post(sourceBean.getApi(), params, new okhttp3.Callback() {
-                        @Override
-                        public void onFailure(@NonNull Call call, IOException e) {
-                            sortResult.postValue(null);
-                        }
-                        @Override
-                        public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) throws IOException {
-                            assert response.body() != null;
-                            String sortJson  = response.body().string();
-                            AbsSortXml sortXml = sortJson(sortResult, sortJson);
-                            if (sortXml != null && Hawk.get(HawkConfig.HOME_REC, 0) == 1) {
-                                AbsXml absXml = json(null, sortJson, sourceBean.getKey());
-                                if (absXml != null && absXml.movie != null && absXml.movie.videoList != null && absXml.movie.videoList.size() > 0) {
-                                    sortXml.videoList = absXml.movie.videoList;
-                                    sortResult.postValue(sortXml);                                
-                                }
-                            } else {
-                                sortResult.postValue(sortXml);
-                            }                        
-                        }
-                    });
-                } catch (Exception ignored) {
-                    sortResult.postValue(null);
-                }
-            }  
+                    }
         } else {
             sortResult.postValue(null);
         }
