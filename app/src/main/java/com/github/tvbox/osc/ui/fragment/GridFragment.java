@@ -53,6 +53,7 @@ public class GridFragment extends BaseLazyFragment {
     private boolean isLoad = false;
     private boolean isTop = true;
     private View focusedView = null;
+    private String default_sourceKey = null;
 
     private class GridInfo {
         public String sortID = "";
@@ -68,6 +69,10 @@ public class GridFragment extends BaseLazyFragment {
 
     public static GridFragment newInstance(MovieSort.SortData sortData) {
         return new GridFragment().setArguments(sortData);
+    }
+    
+    public GridFragment(String sourceKey) {
+        this.default_sourceKey = sourceKey;
     }
 
     public GridFragment setArguments(MovieSort.SortData sortData) {
