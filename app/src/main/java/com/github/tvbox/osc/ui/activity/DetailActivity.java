@@ -722,6 +722,11 @@ public class DetailActivity extends BaseActivity {
             public void onChanged(AbsXml absXml) {
                 if (absXml != null && absXml.movie != null && absXml.movie.videoList != null && absXml.movie.videoList.size() > 0) {
                     showSuccess();
+                    if (!TextUtils.isEmpty(absXml.msg) && !absXml.msg.equals("数据列表")) {
+                        Toast.makeText(DetailActivity.this, absXml.msg, Toast.LENGTH_SHORT).show();
+                        showEmpty();
+                        return;
+                    }
                     mVideo = absXml.movie.videoList.get(0);
                     mVideo.id = vodId;
                     if (TextUtils.isEmpty(mVideo.name)) mVideo.name = "片名";
