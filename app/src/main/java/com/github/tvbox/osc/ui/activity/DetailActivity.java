@@ -140,6 +140,10 @@ public class DetailActivity extends BaseActivity {
     private boolean hadQuickStart = false;    
     private final List<String> quickSearchWord = new ArrayList<>();
     private ExecutorService searchExecutorService = null;
+    private SeriesGroupAdapter seriesGroupAdapter;
+    private List < List < VodInfo.VodSeries >> uu;
+    private int GroupCount;
+    private int GroupIndex = 0;
     
     // preview : true 开启 false 关闭
     VodInfo previewVodInfo = null;
