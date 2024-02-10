@@ -96,6 +96,11 @@ public class ApiDialog extends BaseDialog {
                 }
                 // Capture Live input into Settings & Live History (max 20)
                 Hawk.put(HawkConfig.LIVE_URL, newLive);
+                if (newLive.startsWith("file://")) {
+                    newLive = newLive.replace("file://", "clan://localhost/");
+                } else if (newLive.startsWith("./")) {
+                    newLive = newLive.replace("./", "clan://localhost/");
+                }
                 if (!newLive.isEmpty()) {
                     ArrayList<String> liveHistory = Hawk.get(HawkConfig.LIVE_HISTORY, new ArrayList<String>());
                     if (!liveHistory.contains(newLive))
@@ -103,6 +108,7 @@ public class ApiDialog extends BaseDialog {
                     if (liveHistory.size() > 20)
                         liveHistory.remove(20);
                     Hawk.put(HawkConfig.LIVE_HISTORY, liveHistory);
+                    listener.onchange(newLive);
                 }
                 // Capture EPG input into Settings
                 Hawk.put(HawkConfig.EPG_URL, newEPG);
