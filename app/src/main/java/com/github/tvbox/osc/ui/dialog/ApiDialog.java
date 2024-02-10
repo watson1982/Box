@@ -107,8 +107,7 @@ public class ApiDialog extends BaseDialog {
                         liveHistory.add(0, newLive);
                     if (liveHistory.size() > 20)
                         liveHistory.remove(20);
-                    Hawk.put(HawkConfig.LIVE_HISTORY, liveHistory);
-                    listener.onchange(newLive);
+                    Hawk.put(HawkConfig.LIVE_HISTORY, liveHistory);                 
                 }
                 // Capture EPG input into Settings
                 Hawk.put(HawkConfig.EPG_URL, newEPG);
