@@ -16,7 +16,7 @@ public class FastListAdapter extends BaseQuickAdapter<String, BaseViewHolder> {
 
     @Override
     protected void convert(BaseViewHolder helper, String item) {
-        helper.setText(R.id.tvSearchWord, item);
+        helper.setText(R.id.tvSearchSite, item);
     }
 
 
